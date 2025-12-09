@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pixel 10 Clock - Bootstrap Edition</title>
+    <title>ストップウォッチ&タイマー</title>
     
     <!-- Fonts: Outfit (Geometry compatible) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,6 +77,8 @@
             background-color: var(--md-sys-color-background);
             color: var(--md-sys-color-on-background);
             height: 100vh;
+            /* モバイルブラウザのアドレスバー対策 */
+            height: 100dvh;
             display: flex; flex-direction: column;
             overflow: hidden;
             transition: background-color 0.4s, color 0.4s;
@@ -100,30 +102,32 @@
         /* --- Layout --- */
         main {
             flex: 1; position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
         }
 
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+            opacity: 0; pointer-events: none; visibility: hidden; /* ここで誤タップ防止 */
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1), visibility 0.3s;
             transform: scale(0.95);
             background-color: var(--md-sys-color-background);
             z-index: 1;
         }
         .screen.active {
-            opacity: 1; pointer-events: auto; transform: scale(1); z-index: 5;
+            opacity: 1; pointer-events: auto; visibility: visible;
+            transform: scale(1); z-index: 5;
         }
 
         /* Header */
         .header {
-            width: 100%; padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; height: 64px;
+            width: 100%; padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; height: 64px; flex-shrink: 0;
         }
         .icon-btn {
             background: none; border: none; color: var(--md-sys-color-on-background);
             cursor: pointer; padding: 12px; border-radius: 50%;
             transition: background-color 0.2s;
-            font-size: 24px; /* Bootstrap Icons default size fix */
+            font-size: 24px;
             display: flex; align-items: center; justify-content: center;
         }
         .icon-btn:active { background-color: var(--md-sys-color-surface-variant); }
@@ -134,12 +138,16 @@
             font-variant-numeric: tabular-nums; margin: 20px 0;
             color: var(--md-sys-color-on-background);
         }
+        /* モバイル対応：画面が小さい時にフォントを少し小さく */
+        @media (max-height: 700px) {
+            .display-large { font-size: 60px; margin: 10px 0; }
+        }
 
         /* --- Buttons with Ripple --- */
         .controls-wrapper {
             width: 100%; padding: 32px 24px;
             display: flex; justify-content: space-between; align-items: center;
-            margin-top: auto;
+            margin-top: auto; flex-shrink: 0;
         }
         
         .btn {
@@ -188,7 +196,7 @@
         .nav-bar {
             background-color: var(--md-sys-color-surface-container);
             height: 80px; display: flex; justify-content: space-around; align-items: center;
-            z-index: 20; padding-bottom: 12px;
+            z-index: 20; padding-bottom: 12px; flex-shrink: 0;
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center;
@@ -223,12 +231,13 @@
             display: flex; justify-content: space-between;
             font-size: 18px; font-variant-numeric: tabular-nums;
             animation: slideInUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+            flex-shrink: 0;
         }
 
         /* --- TIMER --- */
         .timer-list-container {
             flex: 1; width: 100%; overflow-y: auto;
-            padding: 10px 16px 100px 16px;
+            padding: 10px 16px 100px 16px; /* FABのために下部余白多め */
             display: flex; flex-direction: column; gap: 16px; align-items: center;
         }
         
@@ -240,6 +249,7 @@
             display: flex; flex-direction: column; align-items: center;
             transition: background-color 0.3s;
             animation: slideInUp 0.4s cubic-bezier(0.2, 0, 0, 1) forwards;
+            flex-shrink: 0;
         }
         .timer-card.finished {
             background-color: var(--md-sys-color-error-container);
@@ -291,30 +301,43 @@
         
         /* Input Mode */
         .timer-input-screen {
-            background-color: var(--md-sys-color-background); z-index: 50;
+            background-color: var(--md-sys-color-background); 
+            z-index: 50;
+            /* 他の画面より常に上に表示されるが、activeでないときはvisibility:hiddenで隠れる */
         }
         .input-display-area {
             display: flex; flex-direction: column; align-items: center;
-            margin-top: 40px; margin-bottom: 20px; cursor: pointer;
+            margin-top: 20px; margin-bottom: 20px; cursor: pointer;
             padding: 20px; border-radius: 16px;
             transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+        @media (min-height: 700px) {
+            .input-display-area { margin-top: 40px; }
         }
         .input-display-area:active { background-color: var(--md-sys-color-surface-container); }
         
         .timer-val-display {
-            font-size: 64px; font-weight: 300; color: var(--md-sys-color-primary);
+            font-size: 56px; font-weight: 300; color: var(--md-sys-color-primary);
             font-variant-numeric: tabular-nums;
+        }
+        @media (min-height: 600px) {
+            .timer-val-display { font-size: 64px; }
         }
         .timer-val-display.placeholder { color: var(--md-sys-color-surface-variant); }
         
         .numpad {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
             width: 100%; max-width: 320px; padding: 0 10px;
+            margin-bottom: 10px;
         }
         .num-btn {
-            height: 64px; border-radius: 32px; background: transparent;
-            color: var(--md-sys-color-on-background); font-size: 26px;
+            height: 56px; border-radius: 28px; background: transparent;
+            color: var(--md-sys-color-on-background); font-size: 24px;
             border: none; cursor: pointer; font-family: var(--font-family);
+        }
+        @media (min-height: 700px) {
+            .num-btn { height: 64px; border-radius: 32px; font-size: 26px; gap: 12px; }
         }
         .num-btn:active { background-color: var(--md-sys-color-surface-variant); }
         
@@ -325,11 +348,11 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 100;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
             display: flex; justify-content: center; align-items: flex-end;
             backdrop-filter: blur(2px);
         }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; visibility: visible; }
         
         .settings-sheet {
             width: 100%; max-width: 600px;
@@ -377,8 +400,8 @@
     <main>
         <!-- STOPWATCH SCREEN -->
         <div id="stopwatch-screen" class="screen active">
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; width:100%;">
-                <div class="display-large" id="sw-display" style="margin-top:60px;">
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; width:100%; overflow: hidden;">
+                <div class="display-large" id="sw-display" style="margin-top:auto; margin-bottom: auto;">
                     00<span style="font-size:0.5em; vertical-align: top;">s</span>00
                 </div>
                 <div class="lap-list" id="sw-laps"></div>
@@ -549,7 +572,7 @@
         // === NAVIGATION ===
         function navTo(screenId, btnEl) {
             document.querySelectorAll('.screen').forEach(el => {
-                // Keep input screen managed separately
+                // Input screen is managed separately
                 if(el.id !== 'timer-input-screen') el.classList.remove('active');
             });
             document.getElementById(screenId + '-screen').classList.add('active');
@@ -751,11 +774,17 @@
             updateTimerUI(timer);
         }
 
+        function stopTimerAlarm(timer) {
+            if (timer.alarmInterval) {
+                clearInterval(timer.alarmInterval);
+                timer.alarmInterval = null;
+            }
+        }
+
         function deleteTimer(id) {
             const idx = appState.timers.findIndex(t => t.id === id);
             if (idx > -1) {
-                // Clear alarm interval if exists
-                if (appState.timers[idx].alarmInterval) clearInterval(appState.timers[idx].alarmInterval);
+                stopTimerAlarm(appState.timers[idx]);
                 appState.timers.splice(idx, 1);
                 const el = document.getElementById(`timer-card-${id}`);
                 if (el) el.remove();
@@ -767,13 +796,19 @@
             const timer = appState.timers.find(t => t.id === id);
             if (!timer) return;
 
-            // If timer is finished, clicking the button stops/deletes it
+            const icon = document.getElementById(`control-icon-${id}`);
+
+            // 終了時にボタンを押すと、リセットして一時停止状態に戻る（再利用可能に）
             if (timer.finished) {
-                deleteTimer(id);
+                stopTimerAlarm(timer);
+                timer.finished = false;
+                timer.running = false; // 一時停止状態でリセット
+                timer.remainingMs = timer.totalMs; // 時間をリセット
+                icon.className = 'bi bi-play-fill';
+                updateTimerUI(timer);
                 return;
             }
 
-            const icon = document.getElementById(`control-icon-${id}`);
             if (timer.running) {
                 timer.running = false;
                 icon.className = 'bi bi-play-fill';
@@ -787,12 +822,28 @@
 
         function addMinuteToTimer(id) {
             const timer = appState.timers.find(t => t.id === id);
-            if (timer && !timer.finished) {
-                timer.totalMs += 60000;
-                timer.remainingMs += 60000;
-                if (timer.running) timer.endTime += 60000;
+            if (!timer) return;
+            
+            const icon = document.getElementById(`control-icon-${id}`);
+
+            // 終了時に+1分を押すと、アラームを止めて1分追加して再開
+            if (timer.finished) {
+                stopTimerAlarm(timer);
+                timer.finished = false;
+                timer.remainingMs = 60000; // 0秒 + 60秒
+                timer.totalMs += 60000; // 合計時間も増やす（またはリセット+60秒でもよいが、ここでは追加）
+                timer.endTime = Date.now() + 60000;
+                timer.running = true; // 即再開
+                icon.className = 'bi bi-pause-fill';
                 updateTimerUI(timer);
+                return;
             }
+
+            // 通常時
+            timer.totalMs += 60000;
+            timer.remainingMs += 60000;
+            if (timer.running) timer.endTime += 60000;
+            updateTimerUI(timer);
         }
 
         function getEndTimeString(ts) {
@@ -832,11 +883,17 @@
             if (timer.finished) {
                 elCard.classList.add('finished');
                 elEnd.textContent = "終了";
-                if(elIcon) elIcon.className = 'bi bi-stop-fill';
+                if(elIcon) elIcon.className = 'bi bi-stop-fill'; // 停止（リセット）アイコンに変更
             } else {
                 elCard.classList.remove('finished');
-                if (timer.running) elEnd.textContent = getEndTimeString(timer.endTime);
-                else elEnd.textContent = "一時停止中";
+                if (timer.running) {
+                    elEnd.innerHTML = `<i class="bi bi-bell-fill"></i> ${getEndTimeString(timer.endTime)}`;
+                    if(elIcon) elIcon.className = 'bi bi-pause-fill';
+                }
+                else {
+                    elEnd.textContent = "一時停止中";
+                    if(elIcon) elIcon.className = 'bi bi-play-fill';
+                }
             }
         }
 
@@ -845,6 +902,7 @@
             let hasActive = false;
 
             appState.timers.forEach(timer => {
+                // finished状態のタイマーもUI更新やアラーム継続のために監視対象とする
                 if (!timer.finished) {
                     hasActive = true;
                     if (timer.running) {
@@ -863,6 +921,8 @@
                         }
                     }
                     updateTimerUI(timer);
+                } else {
+                    // 終了後もUI（点滅など）のために更新が必要な場合ここに記述
                 }
             });
 
