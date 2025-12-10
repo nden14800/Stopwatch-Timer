@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ストップウォッチ&タイマー</title>
+    <title>タイマー&ストップウォッチ</title>
     
     <!-- Fonts: Outfit (Geometry compatible) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,13 +36,7 @@
             
             --md-sys-color-outline: #74777f;
 
-            --shape-corner-medium: 16px;
-            --shape-corner-large: 28px;
-            --shape-corner-xl: 40px;
-            
             --font-family: 'Outfit', sans-serif;
-            
-            --anim-standard: 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -76,8 +70,6 @@
             font-family: var(--font-family);
             background-color: var(--md-sys-color-background);
             color: var(--md-sys-color-on-background);
-            height: 100vh;
-            /* モバイルブラウザのアドレスバー対策 */
             height: 100dvh;
             display: flex; flex-direction: column;
             overflow: hidden;
@@ -85,10 +77,6 @@
         }
 
         /* --- Animations --- */
-        @keyframes ripple {
-            0% { transform: scale(0); opacity: 0.5; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
         @keyframes slideInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -108,7 +96,7 @@
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center;
-            opacity: 0; pointer-events: none; visibility: hidden; /* ここで誤タップ防止 */
+            opacity: 0; pointer-events: none; visibility: hidden;
             transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1), visibility 0.3s;
             transform: scale(0.95);
             background-color: var(--md-sys-color-background);
@@ -121,7 +109,7 @@
 
         /* Header */
         .header {
-            width: 100%; padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; height: 64px; flex-shrink: 0;
+            width: 100%; padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; height: 56px; flex-shrink: 0;
         }
         .icon-btn {
             background: none; border: none; color: var(--md-sys-color-on-background);
@@ -135,17 +123,17 @@
         /* Typography */
         .display-large {
             font-size: 80px; font-weight: 200; line-height: 1; letter-spacing: -2px;
-            font-variant-numeric: tabular-nums; margin: 20px 0;
+            font-variant-numeric: tabular-nums; margin: 10px 0;
             color: var(--md-sys-color-on-background);
+            text-align: center; white-space: nowrap;
         }
-        /* モバイル対応：画面が小さい時にフォントを少し小さく */
-        @media (max-height: 700px) {
-            .display-large { font-size: 60px; margin: 10px 0; }
+        @media (max-width: 450px) {
+            .display-large { font-size: 52px; letter-spacing: -1px; }
         }
 
-        /* --- Buttons with Ripple --- */
+        /* --- Buttons --- */
         .controls-wrapper {
-            width: 100%; padding: 32px 24px;
+            width: 100%; padding: 24px 24px;
             display: flex; justify-content: space-between; align-items: center;
             margin-top: auto; flex-shrink: 0;
         }
@@ -155,16 +143,7 @@
             font-family: var(--font-family); font-weight: 500; font-size: 16px;
             display: flex; align-items: center; justify-content: center;
             position: relative; overflow: hidden;
-            transition: transform 0.1s, background-color 0.3s, opacity 0.3s;
-        }
-        .btn::after {
-            content: ""; position: absolute; background: rgba(255,255,255,0.3);
-            border-radius: 50%; width: 100%; padding-top: 100%;
-            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            opacity: 0; pointer-events: none;
-        }
-        .btn:active::after {
-            animation: ripple 0.6s ease-out;
+            transition: transform 0.1s, background-color 0.3s;
         }
         .btn:active { transform: scale(0.96); }
 
@@ -172,7 +151,7 @@
             width: 110px; height: 72px; border-radius: 36px;
             background-color: var(--md-sys-color-primary);
             color: var(--md-sys-color-on-primary);
-            font-size: 32px; /* For icon */
+            font-size: 32px;
         }
         .btn-secondary {
             width: 72px; height: 72px; border-radius: 50%;
@@ -181,16 +160,14 @@
             font-size: 24px;
         }
         .btn-fab {
-            position: absolute; bottom: 30px; right: 24px;
+            position: absolute; bottom: 24px; right: 24px;
             width: 64px; height: 64px; border-radius: 22px;
             background-color: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 10;
-            transition: transform 0.2s, box-shadow 0.2s;
             font-size: 28px;
         }
-        .btn-fab:active { transform: scale(0.95); }
 
         /* --- Navigation --- */
         .nav-bar {
@@ -219,62 +196,65 @@
 
         /* --- STOPWATCH --- */
         .lap-list {
-            flex: 1; width: 92%; overflow-y: auto;
+            flex: 1; width: 94%; overflow-y: auto;
             display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px;
-            -ms-overflow-style: none; scrollbar-width: none;
+            scrollbar-width: none;
         }
         .lap-list::-webkit-scrollbar { display: none; }
         
         .lap-card {
             background-color: var(--md-sys-color-surface-container);
-            padding: 16px 24px; border-radius: 12px;
-            display: flex; justify-content: space-between;
-            font-size: 18px; font-variant-numeric: tabular-nums;
+            padding: 12px 20px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 16px; font-variant-numeric: tabular-nums;
             animation: slideInUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
             flex-shrink: 0;
         }
+        .lap-num { color: var(--md-sys-color-primary); font-weight: 600; width: 40px; }
+        .lap-time { flex: 1; text-align: left; }
+        .lap-diff { font-size: 0.85em; opacity: 0.7; margin-left: 8px; }
+        .lap-del-btn {
+            background: none; border: none; color: var(--md-sys-color-outline);
+            padding: 8px; cursor: pointer; font-size: 18px;
+        }
+        .lap-del-btn:active { color: var(--md-sys-color-error); }
 
-        /* --- TIMER --- */
+        /* --- TIMER CARD (NEW HORIZONTAL LAYOUT) --- */
         .timer-list-container {
             flex: 1; width: 100%; overflow-y: auto;
-            padding: 10px 16px 100px 16px; /* FABのために下部余白多め */
+            padding: 10px 16px 100px 16px;
             display: flex; flex-direction: column; gap: 16px; align-items: center;
         }
         
         .timer-card {
-            width: 100%; max-width: 380px;
+            width: 100%; max-width: 460px; /* Wider for side-by-side */
             background-color: var(--md-sys-color-surface-container);
-            border-radius: 28px; padding: 24px 20px;
+            border-radius: 32px; padding: 16px 24px;
             position: relative;
-            display: flex; flex-direction: column; align-items: center;
+            display: flex; flex-direction: row; /* Horizontal */
+            align-items: center; justify-content: space-between;
             transition: background-color 0.3s;
             animation: slideInUp 0.4s cubic-bezier(0.2, 0, 0, 1) forwards;
             flex-shrink: 0;
         }
-        .timer-card.finished {
+        .timer-card.overtime {
             background-color: var(--md-sys-color-error-container);
             color: var(--md-sys-color-on-error-container);
-            animation: pulseAlert 1.2s infinite;
+            animation: pulseAlert 1.5s infinite;
         }
-        .timer-card.finished .circle-progress {
-            stroke: var(--md-sys-color-error);
-        }
-        .timer-card.finished .circle-bg {
-            stroke: rgba(0,0,0,0.1);
-        }
+        .timer-card.overtime .circle-progress { stroke: var(--md-sys-color-error); }
+        .timer-card.overtime .circle-bg { stroke: rgba(0,0,0,0.1); }
 
-        /* Circular Progress */
-        .card-circle-container {
-            width: 200px; height: 200px; position: relative;
+        /* Left Side: Circle & Time */
+        .card-circle-container { 
+            width: 160px; height: 160px; position: relative; flex-shrink: 0;
         }
         svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-        circle {
-            fill: none; stroke-width: 10; stroke-linecap: round;
-        }
+        circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .circle-bg { stroke: var(--md-sys-color-surface-variant); }
         .circle-progress {
             stroke: var(--md-sys-color-primary);
-            stroke-dasharray: 565; /* 2*PI*90 */
+            stroke-dasharray: 452; /* 2*PI*72 */
             stroke-dashoffset: 0;
             transition: stroke-dashoffset 0.1s linear;
         }
@@ -283,37 +263,69 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .time-text { font-size: 44px; font-weight: 300; line-height: 1; letter-spacing: -1px; }
-        .end-text { font-size: 13px; opacity: 0.7; margin-top: 8px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+        .time-text { 
+            font-size: 40px; font-weight: 300; line-height: 1; 
+            letter-spacing: -1px; white-space: nowrap; 
+            margin-top: 10px; /* Adjust for end time */
+        }
         
+        /* End Time Display (New requirement: Above reset button) */
+        .end-time-display {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            opacity: 0.8;
+            position: absolute;
+            top: 25px; /* Positioned above the time text/reset button */
+            white-space: nowrap;
+        }
+
+        /* Reset Button (Inside Circle, under time) */
+        .btn-reset-internal {
+            margin-top: 8px;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(0,0,0,0.05); color: inherit;
+            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; transition: background 0.2s;
+        }
+        .btn-reset-internal:active { background: rgba(0,0,0,0.1); }
+        
+        /* Right Side: Controls */
         .timer-card-controls {
-            display: flex; gap: 20px; margin-top: 20px; width: 100%; justify-content: center;
+            display: flex; flex-direction: column; /* Vertical */
+            gap: 12px; margin-left: 20px; align-items: center; justify-content: center;
+            flex: 1;
         }
-        .mini-btn {
-            width: 48px; height: 48px; border-radius: 24px;
-            border: none; background: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-background);
+        
+        .control-btn-main {
+            width: 64px; height: 64px; border-radius: 20px;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none; font-size: 28px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; overflow: hidden;
-            font-size: 20px;
         }
-        .mini-btn:active { transform: scale(0.92); }
+        .control-btn-sub {
+            width: 56px; height: 56px; border-radius: 18px;
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-background);
+            border: none; font-size: 22px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .control-text-btn {
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-background);
+            border: none; border-radius: 16px;
+            padding: 10px 16px; font-weight: 600; font-size: 14px;
+            cursor: pointer; width: 100%; max-width: 80px; text-align: center;
+        }
         
         /* Input Mode */
-        .timer-input-screen {
-            background-color: var(--md-sys-color-background); 
-            z-index: 50;
-            /* 他の画面より常に上に表示されるが、activeでないときはvisibility:hiddenで隠れる */
-        }
+        .timer-input-screen { background-color: var(--md-sys-color-background); z-index: 50; }
         .input-display-area {
             display: flex; flex-direction: column; align-items: center;
-            margin-top: 20px; margin-bottom: 20px; cursor: pointer;
+            margin-top: 40px; margin-bottom: 20px; cursor: pointer;
             padding: 20px; border-radius: 16px;
-            transition: background-color 0.2s;
-            flex-shrink: 0;
-        }
-        @media (min-height: 700px) {
-            .input-display-area { margin-top: 40px; }
+            transition: background-color 0.2s; flex-shrink: 0;
         }
         .input-display-area:active { background-color: var(--md-sys-color-surface-container); }
         
@@ -321,36 +333,27 @@
             font-size: 56px; font-weight: 300; color: var(--md-sys-color-primary);
             font-variant-numeric: tabular-nums;
         }
-        @media (min-height: 600px) {
-            .timer-val-display { font-size: 64px; }
-        }
         .timer-val-display.placeholder { color: var(--md-sys-color-surface-variant); }
         
         .numpad {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            width: 100%; max-width: 320px; padding: 0 10px;
-            margin-bottom: 10px;
+            width: 100%; max-width: 320px; padding: 0 10px; margin-bottom: 10px;
         }
         .num-btn {
-            height: 56px; border-radius: 28px; background: transparent;
+            height: 60px; border-radius: 30px; background: transparent;
             color: var(--md-sys-color-on-background); font-size: 24px;
             border: none; cursor: pointer; font-family: var(--font-family);
         }
-        @media (min-height: 700px) {
-            .num-btn { height: 64px; border-radius: 32px; font-size: 26px; gap: 12px; }
-        }
         .num-btn:active { background-color: var(--md-sys-color-surface-variant); }
-        
-        /* Hidden Input for Keyboard */
         #hidden-input { position: absolute; opacity: 0; top: -1000px; }
 
-        /* --- Settings Modal --- */
+        /* --- Settings --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 100;
-            opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            opacity: 0; pointer-events: none; visibility: hidden;
             display: flex; justify-content: center; align-items: flex-end;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px); transition: opacity 0.3s;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; visibility: visible; }
         
@@ -359,6 +362,7 @@
             background: var(--md-sys-color-surface);
             border-radius: 28px 28px 0 0; padding: 24px;
             transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+            max-height: 80vh; overflow-y: auto;
         }
         .modal-overlay.open .settings-sheet { transform: translateY(0); }
         
@@ -367,32 +371,26 @@
             padding: 18px 0; border-bottom: 1px solid var(--md-sys-color-surface-container);
         }
         .setting-label { font-size: 16px; font-weight: 500; }
+        .setting-sub { font-size: 12px; color: var(--md-sys-color-outline); margin-top: 4px; }
         
-        /* Switch */
         .switch { position: relative; display: inline-block; width: 52px; height: 32px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
+        .slider-toggle {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--md-sys-color-surface-variant);
             border-radius: 32px; transition: .3s;
             border: 2px solid var(--md-sys-color-outline); box-sizing: border-box;
         }
-        .slider:before {
-            position: absolute; content: "";
-            height: 16px; width: 16px; left: 6px; bottom: 6px;
-            background-color: var(--md-sys-color-outline);
-            border-radius: 50%; transition: .3s;
+        .slider-toggle:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 6px; bottom: 6px;
+            background-color: var(--md-sys-color-outline); border-radius: 50%; transition: .3s;
         }
-        input:checked + .slider {
-            background-color: var(--md-sys-color-primary);
-            border-color: var(--md-sys-color-primary);
-        }
-        input:checked + .slider:before {
-            background-color: var(--md-sys-color-on-primary);
-            transform: translateX(20px);
+        input:checked + .slider-toggle { background-color: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); }
+        input:checked + .slider-toggle:before {
+            background-color: var(--md-sys-color-on-primary); transform: translateX(20px);
             height: 24px; width: 24px; left: 2px; bottom: 2px;
         }
+        input[type=range] { width: 100%; max-width: 150px; accent-color: var(--md-sys-color-primary); }
     </style>
 </head>
 <body>
@@ -402,7 +400,7 @@
         <div id="stopwatch-screen" class="screen active">
             <div style="flex:1; display:flex; flex-direction:column; align-items:center; width:100%; overflow: hidden;">
                 <div class="display-large" id="sw-display" style="margin-top:auto; margin-bottom: auto;">
-                    00<span style="font-size:0.5em; vertical-align: top;">s</span>00
+                    0.000
                 </div>
                 <div class="lap-list" id="sw-laps"></div>
             </div>
@@ -500,16 +498,28 @@
                 <div class="setting-label">終了時の音 (警告音)</div>
                 <label class="switch">
                     <input type="checkbox" id="setting-sound" checked>
-                    <span class="slider"></span>
+                    <span class="slider-toggle"></span>
                 </label>
             </div>
             
             <div class="setting-item">
-                <div class="setting-label">終了時刻に日付・年を表示</div>
+                <div>
+                    <div class="setting-label">終了時刻に日付・年を表示</div>
+                    <div class="setting-sub">タイマーの終了時刻表示に使用されます</div>
+                </div>
                 <label class="switch">
                     <input type="checkbox" id="setting-date">
-                    <span class="slider"></span>
+                    <span class="slider-toggle"></span>
                 </label>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">ストップウォッチの桁数</div>
+                    <div class="setting-sub">小数点以下の表示桁数: <span id="precision-val">3</span></div>
+                </div>
+                <!-- Precision range updated to max 3 as requested -->
+                <input type="range" id="setting-precision" min="0" max="3" value="3" step="1" oninput="updatePrecisionDisplay()">
             </div>
 
             <div style="margin-top:30px; text-align:right;">
@@ -521,7 +531,11 @@
     <script>
         // === GLOBAL APP STATE ===
         const appState = {
-            settings: { sound: true, showDate: false },
+            settings: { 
+                sound: true, 
+                showDate: false,
+                swPrecision: 3 // Default set to 3
+            },
             timers: [] 
         };
 
@@ -545,17 +559,15 @@
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
-            // "Digital Alarm" Sound: Square wave, high pitch, pulsing
             osc.type = 'square';
-            osc.frequency.setValueAtTime(880, t); // A5
-            osc.frequency.setValueAtTime(1760, t + 0.1); // A6 (Pi-Pi)
+            osc.frequency.setValueAtTime(880, t); 
+            osc.frequency.setValueAtTime(1760, t + 0.1); 
             osc.frequency.setValueAtTime(880, t + 0.2); 
             osc.frequency.setValueAtTime(1760, t + 0.3);
 
-            // Pulse Envelope
             gain.gain.setValueAtTime(0.1, t);
             gain.gain.setValueAtTime(0.1, t + 0.08);
-            gain.gain.setValueAtTime(0, t + 0.09); // Silence
+            gain.gain.setValueAtTime(0, t + 0.09);
             
             gain.gain.setValueAtTime(0.1, t + 0.1);
             gain.gain.setValueAtTime(0.1, t + 0.18);
@@ -572,7 +584,6 @@
         // === NAVIGATION ===
         function navTo(screenId, btnEl) {
             document.querySelectorAll('.screen').forEach(el => {
-                // Input screen is managed separately
                 if(el.id !== 'timer-input-screen') el.classList.remove('active');
             });
             document.getElementById(screenId + '-screen').classList.add('active');
@@ -581,12 +592,12 @@
             btnEl.classList.add('active');
         }
 
-        // === STOPWATCH LOGIC ===
-        // Totally isolated variables
+        // === STOPWATCH LOGIC (High Precision) ===
         let swRunning = false;
-        let swStartTime = 0;
-        let swElapsed = 0;
+        let swStartTime = 0; // performance.now() timestamp
+        let swElapsed = 0;   // accumulated ms (float)
         let swReqId = null;
+        let swLastLapTime = 0; // float ms
 
         const swDisplay = document.getElementById('sw-display');
         const swBtnMain = document.getElementById('sw-btn-main');
@@ -595,31 +606,96 @@
         const swBtnLap = document.getElementById('sw-btn-lap');
         const swLaps = document.getElementById('sw-laps');
 
-        function formatSwTime(ms) {
-            const m = Math.floor(ms / 60000);
-            const s = Math.floor((ms % 60000) / 1000);
-            const cs = Math.floor((ms % 1000) / 10);
-            return `${m > 0 ? m + ':' : ''}${String(s).padStart(2,'0')}<span style="font-size:0.5em; vertical-align: top;">.</span>${String(cs).padStart(2,'0')}`;
+        // Use performance.now() for high precision if available
+        const getNow = () => performance.now();
+
+        /**
+         * ストップウォッチの時間を指定された精度と動的フォーマットで整形する
+         * @param {number} msFloat 経過ミリ秒 (float)
+         * @returns {string} HTMLを含む整形済み文字列
+         */
+        function formatSwTime(msFloat) {
+            const p = appState.settings.swPrecision;
+            
+            // Total seconds (including decimals)
+            const totalSec = msFloat / 1000;
+            
+            // Calculate H, M, S components
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = Math.floor(totalSec % 60);
+            
+            // Get the fractional part for the requested precision
+            // Use toFixed to handle rounding and get the fixed-length decimal string
+            let fracStr = (totalSec % 1).toFixed(p).substring(2); // e.g. "0.123" -> "123"
+            
+            let timeStr = "";
+
+            // Dynamic Formatting Logic
+            if (h > 0) {
+                // H:MM:SS.frac
+                timeStr = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            } else if (m > 0) {
+                // MM:SS.frac
+                timeStr = `${m}:${String(s).padStart(2, '0')}`;
+            } else {
+                // SS.frac
+                timeStr = `${s}`;
+            }
+
+            // Append fractional part if precision > 0
+            if (p > 0) {
+                 // The fractional part should have the requested precision.
+                 // We re-calculate to ensure high precision floats are correctly truncated/rounded.
+                 let decimalPart = Math.floor((msFloat / 1000) * (10 ** p)) % (10 ** p);
+                 fracStr = String(decimalPart).padStart(p, '0');
+                 return `${timeStr}<span style="font-size:0.5em; vertical-align: top;">.${fracStr}</span>`;
+            } else {
+                return timeStr;
+            }
         }
+        
+        /**
+         * ラップタイム差分表示用のシンプルなフォーマット (動的フォーマットを使用)
+         * @param {number} msFloat 経過ミリ秒 (float)
+         * @returns {string} 整形済み文字列
+         */
+        function formatTimeSimple(msFloat) {
+            const h = Math.floor(msFloat / 3600000);
+            const m = Math.floor((msFloat % 3600000) / 60000);
+            const s = Math.floor((msFloat % 60000) / 1000);
+            
+            let timeStr = "";
+            
+            if (h > 0) {
+                timeStr = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            } else if (m > 0) {
+                timeStr = `${m}:${String(s).padStart(2, '0')}`;
+            } else {
+                timeStr = `${s}`;
+            }
+
+            // Always add milliseconds for lap display for context, using 3 digits
+            const ms = Math.floor(msFloat % 1000);
+            return `${timeStr}.${String(ms).padStart(3, '0')}`;
+        }
+
 
         function toggleStopwatch() {
             if (!swRunning) {
-                // Start
                 swRunning = true;
-                swStartTime = Date.now() - swElapsed;
+                // Subtract swElapsed to ensure smooth restart from paused time
+                swStartTime = getNow() - swElapsed; 
                 swReqId = requestAnimationFrame(updateSwLoop);
                 
                 swIconMain.className = 'bi bi-pause-fill';
                 swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary-container)';
                 swBtnMain.style.color = 'var(--md-sys-color-on-primary-container)';
-                
                 swBtnReset.style.opacity = 1; swBtnReset.style.pointerEvents = 'auto';
                 swBtnLap.style.opacity = 1; swBtnLap.style.pointerEvents = 'auto';
             } else {
-                // Stop
                 swRunning = false;
                 cancelAnimationFrame(swReqId);
-                
                 swIconMain.className = 'bi bi-play-fill';
                 swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary)';
                 swBtnMain.style.color = 'var(--md-sys-color-on-primary)';
@@ -628,7 +704,8 @@
 
         function updateSwLoop() {
             if (!swRunning) return;
-            swElapsed = Date.now() - swStartTime;
+            // Calculate elapsed time from the stored start time
+            swElapsed = getNow() - swStartTime;
             swDisplay.innerHTML = formatSwTime(swElapsed);
             swReqId = requestAnimationFrame(updateSwLoop);
         }
@@ -637,23 +714,40 @@
             swRunning = false;
             cancelAnimationFrame(swReqId);
             swElapsed = 0;
-            swDisplay.innerHTML = `00<span style="font-size:0.5em; vertical-align: top;">s</span>00`;
+            swLastLapTime = 0;
+            // Reset display to initial state with current precision
+            swDisplay.innerHTML = formatSwTime(0); 
             swLaps.innerHTML = '';
             
             swIconMain.className = 'bi bi-play-fill';
             swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary)';
             swBtnMain.style.color = 'var(--md-sys-color-on-primary)';
-            
             swBtnReset.style.opacity = 0; swBtnReset.style.pointerEvents = 'none';
             swBtnLap.style.opacity = 0; swBtnLap.style.pointerEvents = 'none';
         }
 
         function lapStopwatch() {
             const lapCount = swLaps.children.length + 1;
+            const currentLap = swElapsed;
+            const diff = currentLap - swLastLapTime;
+            swLastLapTime = currentLap;
+
             const div = document.createElement('div');
             div.className = 'lap-card';
-            div.innerHTML = `<span>#${lapCount}</span> <span>${swDisplay.innerText}</span>`;
+            div.id = `lap-${lapCount}`;
+            div.innerHTML = `
+                <div style="display:flex; align-items:center;">
+                    <span class="lap-num">#${lapCount}</span> 
+                    <span style="font-weight:500;">${swDisplay.innerText}</span>
+                    <span class="lap-diff">(+${formatTimeSimple(diff)})</span>
+                </div>
+                <button class="lap-del-btn" onclick="removeLap(this)"><i class="bi bi-x-lg"></i></button>
+            `;
             swLaps.prepend(div);
+        }
+        
+        function removeLap(btn) {
+            btn.closest('.lap-card').remove();
         }
 
         // === TIMER INPUT LOGIC ===
@@ -663,18 +757,9 @@
         const tmBtnCreate = document.getElementById('tm-btn-create');
         const hiddenInput = document.getElementById('hidden-input');
 
-        function showTimerInput() {
-            tmInputScreen.classList.add('active');
-            resetInput();
-        }
-        function hideTimerInput() {
-            tmInputScreen.classList.remove('active');
-        }
-        function resetInput() {
-            tmRawInput = "";
-            hiddenInput.value = "";
-            updateInputDisplay();
-        }
+        function showTimerInput() { tmInputScreen.classList.add('active'); resetInput(); }
+        function hideTimerInput() { tmInputScreen.classList.remove('active'); }
+        function resetInput() { tmRawInput = ""; hiddenInput.value = ""; updateInputDisplay(); }
         function updateInputDisplay() {
             let s = tmRawInput.padStart(6, '0');
             let h = parseInt(s.substring(0,2));
@@ -690,28 +775,18 @@
                 tmBtnCreate.style.opacity = 0.5; tmBtnCreate.style.pointerEvents = 'none';
             }
         }
-        function numpadInput(n) {
-            if (tmRawInput.length < 6) { tmRawInput += n; updateInputDisplay(); }
-        }
-        function numpadDelete() {
-            tmRawInput = tmRawInput.slice(0, -1); updateInputDisplay();
-        }
-        // Keyboard support
+        function numpadInput(n) { if (tmRawInput.length < 6) { tmRawInput += n; updateInputDisplay(); } }
+        function numpadDelete() { tmRawInput = tmRawInput.slice(0, -1); updateInputDisplay(); }
         function focusHiddenInput() { hiddenInput.focus(); }
         hiddenInput.addEventListener('input', (e) => {
             const nums = e.target.value.replace(/[^0-9]/g, '');
-            tmRawInput = nums.slice(0, 6);
-            e.target.value = tmRawInput;
-            updateInputDisplay();
+            tmRawInput = nums.slice(0, 6); e.target.value = tmRawInput; updateInputDisplay();
         });
 
         function createTimerFromInput() {
             let s = tmRawInput.padStart(6, '0');
             let totalMs = (parseInt(s.substring(0,2)) * 3600 + parseInt(s.substring(2,4)) * 60 + parseInt(s.substring(4,6))) * 1000;
-            if (totalMs > 0) {
-                addTimer(totalMs);
-                hideTimerInput();
-            }
+            if (totalMs > 0) { addTimer(totalMs); hideTimerInput(); }
         }
 
         // === TIMER SYSTEM LOGIC ===
@@ -719,20 +794,20 @@
         const noTimerMsg = document.getElementById('no-timer-msg');
 
         function addTimer(durationMs) {
-            const id = Date.now() + Math.random(); // Unique ID
+            const id = Date.now() + Math.random();
             const timer = {
                 id: id,
                 totalMs: durationMs,
                 remainingMs: durationMs,
                 endTime: Date.now() + durationMs,
                 running: true,
-                finished: false,
+                isOvertime: false,
                 alarmInterval: null
             };
             appState.timers.push(timer);
             renderTimerCard(timer);
             checkNoTimers();
-            // Start the global loop if this is the first timer
+            // Only start the global loop if it's the first timer
             if (appState.timers.length === 1) requestAnimationFrame(globalTimerLoop);
         }
 
@@ -744,29 +819,32 @@
             const div = document.createElement('div');
             div.className = 'timer-card';
             div.id = `timer-card-${timer.id}`;
+            // New Horizontal Layout with End Time and Reset Button inside Time Wrapper
             div.innerHTML = `
                 <div class="card-circle-container">
                     <svg>
-                        <circle cx="100" cy="100" r="90" class="circle-bg"></circle>
-                        <circle cx="100" cy="100" r="90" class="circle-progress" id="progress-${timer.id}"></circle>
+                        <circle cx="80" cy="80" r="72" class="circle-bg"></circle>
+                        <circle cx="80" cy="80" r="72" class="circle-progress" id="progress-${timer.id}"></circle>
                     </svg>
                     <div class="timer-card-time">
-                        <div class="time-text" id="time-text-${timer.id}">00:00</div>
-                        <div class="end-text">
-                            <i class="bi bi-bell-fill"></i>
-                            <span id="end-time-${timer.id}">--:--</span>
-                        </div>
+                        <!-- End Time Display (New requirement: Above reset button) -->
+                        <div class="end-time-display" id="end-time-${timer.id}"></div>
+                        <div class="time-text" id="time-text-${timer.id}">0:00</div>
+                        <button class="btn-reset-internal" onclick="resetTimer(${timer.id})">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="timer-card-controls">
-                    <button class="mini-btn" onclick="deleteTimer(${timer.id})">
-                        <i class="bi bi-trash-fill"></i>
+                    <!-- Changed to X button -->
+                    <button class="control-btn-sub" onclick="handleTrashAction(${timer.id})">
+                        <i class="bi bi-x-lg"></i>
                     </button>
-                    <button class="mini-btn" onclick="toggleTimerState(${timer.id})" id="play-btn-${timer.id}">
+                    <button class="control-btn-main" onclick="toggleTimerState(${timer.id})" id="play-btn-${timer.id}">
                         <i class="bi bi-pause-fill" id="control-icon-${timer.id}"></i>
                     </button>
-                    <button class="mini-btn" onclick="addMinuteToTimer(${timer.id})">
-                        <i class="bi bi-plus-lg"></i> 1m
+                    <button class="control-text-btn" onclick="addMinuteToTimer(${timer.id})">
+                        +1:00
                     </button>
                 </div>
             `;
@@ -781,6 +859,10 @@
             }
         }
 
+        function handleTrashAction(id) {
+            deleteTimer(id);
+        }
+
         function deleteTimer(id) {
             const idx = appState.timers.findIndex(t => t.id === id);
             if (idx > -1) {
@@ -792,29 +874,43 @@
             checkNoTimers();
         }
 
+        function resetTimer(id) {
+            const timer = appState.timers.find(t => t.id === id);
+            if (!timer) return;
+
+            stopTimerAlarm(timer);
+            timer.isOvertime = false;
+            timer.running = false; 
+            timer.remainingMs = timer.totalMs;
+            timer.endTime = Date.now() + timer.totalMs; // Recalculate end time for display
+            
+            const icon = document.getElementById(`control-icon-${id}`);
+            if(icon) icon.className = 'bi bi-play-fill';
+            
+            updateTimerUI(timer);
+        }
+
         function toggleTimerState(id) {
             const timer = appState.timers.find(t => t.id === id);
             if (!timer) return;
 
             const icon = document.getElementById(`control-icon-${id}`);
 
-            // 終了時にボタンを押すと、リセットして一時停止状態に戻る（再利用可能に）
-            if (timer.finished) {
-                stopTimerAlarm(timer);
-                timer.finished = false;
-                timer.running = false; // 一時停止状態でリセット
-                timer.remainingMs = timer.totalMs; // 時間をリセット
-                icon.className = 'bi bi-play-fill';
-                updateTimerUI(timer);
-                return;
-            }
-
             if (timer.running) {
+                // Pause
                 timer.running = false;
+                // If overtime, stop the alarm
+                if (timer.isOvertime) stopTimerAlarm(timer);
                 icon.className = 'bi bi-play-fill';
             } else {
+                // Resume/Start
                 timer.running = true;
                 timer.endTime = Date.now() + timer.remainingMs;
+                // If overtime, restart alarm (in case it was paused)
+                if (timer.isOvertime && !timer.alarmInterval) {
+                     playAlarm();
+                     timer.alarmInterval = setInterval(playAlarm, 1500);
+                }
                 icon.className = 'bi bi-pause-fill';
             }
             updateTimerUI(timer);
@@ -824,109 +920,143 @@
             const timer = appState.timers.find(t => t.id === id);
             if (!timer) return;
             
+            const oneMinute = 60000;
             const icon = document.getElementById(`control-icon-${id}`);
 
-            // 終了時に+1分を押すと、アラームを止めて1分追加して再開
-            if (timer.finished) {
+            if (timer.isOvertime) {
+                // If in overtime, reset overtime state and add 1 minute to remaining time
                 stopTimerAlarm(timer);
-                timer.finished = false;
-                timer.remainingMs = 60000; // 0秒 + 60秒
-                timer.totalMs += 60000; // 合計時間も増やす（またはリセット+60秒でもよいが、ここでは追加）
-                timer.endTime = Date.now() + 60000;
-                timer.running = true; // 即再開
+                timer.isOvertime = false;
+                // The remainingMs is negative, adding oneMinute brings it closer to 0 or positive.
+                timer.remainingMs += oneMinute;
+                // Since the original totalMs is for positive time, we only adjust end time
+                timer.endTime = Date.now() + timer.remainingMs; 
+                timer.running = true;
                 icon.className = 'bi bi-pause-fill';
-                updateTimerUI(timer);
-                return;
+            } else {
+                // If counting down, add 1 minute to total and remaining time
+                timer.totalMs += oneMinute;
+                timer.remainingMs += oneMinute;
+                if (timer.running) timer.endTime += oneMinute;
             }
-
-            // 通常時
-            timer.totalMs += 60000;
-            timer.remainingMs += 60000;
-            if (timer.running) timer.endTime += 60000;
+            // Ensure timer runs if it was paused and now has time
+            if (!timer.running && timer.remainingMs > 0) {
+                 timer.running = true;
+                 timer.endTime = Date.now() + timer.remainingMs;
+                 icon.className = 'bi bi-pause-fill';
+            }
             updateTimerUI(timer);
         }
 
-        function getEndTimeString(ts) {
-            const d = new Date(ts);
-            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            if (appState.settings.showDate) {
-                return d.toLocaleString(undefined, { year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+        /**
+         * タイマーの残り時間を動的フォーマットで整形する
+         * @param {number} ms 残りミリ秒
+         * @param {boolean} isOvertime 時間切れかどうか
+         * @returns {string} 整形済み文字列
+         */
+        function formatTimerDisplay(ms, isOvertime) {
+            if (isOvertime) {
+                // Overtime: Show only absolute seconds with negative sign
+                const sec = Math.ceil(Math.abs(ms) / 1000);
+                return `-${sec}`;
             }
-            return timeStr;
+
+            // Normal: Dynamic formatting
+            const totalSec = Math.ceil(ms / 1000);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+
+            const pad = (num) => String(num).padStart(2, '0');
+
+            if (h > 0) {
+                // H:MM:SS
+                return `${h}:${pad(m)}:${pad(s)}`;
+            } else if (m > 0) {
+                // M:SS
+                return `${m}:${pad(s)}`;
+            } else {
+                // S
+                return `${s}`;
+            }
+        }
+        
+        /**
+         * 終了時刻をフォーマットする
+         * @param {number} timestamp 終了時刻のタイムスタンプ
+         * @returns {string} 整形済み文字列
+         */
+        function formatEndTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            let timeStr = `${hours}:${minutes}`;
+
+            if (appState.settings.showDate) {
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                timeStr = `${month}/${day} ${timeStr}`;
+            }
+            
+            return `終了時刻 ${timeStr}`;
         }
 
         function updateTimerUI(timer) {
             const elProgress = document.getElementById(`progress-${timer.id}`);
             const elText = document.getElementById(`time-text-${timer.id}`);
-            const elEnd = document.getElementById(`end-time-${timer.id}`);
             const elCard = document.getElementById(`timer-card-${timer.id}`);
-            const elIcon = document.getElementById(`control-icon-${timer.id}`);
+            const elEndTime = document.getElementById(`end-time-${timer.id}`);
 
             if (!elProgress) return;
 
-            // Calc Time
-            let totalSec = Math.ceil(timer.remainingMs / 1000);
-            if (totalSec < 0) totalSec = 0;
-            let h = Math.floor(totalSec / 3600);
-            let m = Math.floor((totalSec % 3600) / 60);
-            let s = totalSec % 60;
-            
-            let str = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            if (h > 0) str = `${h}:${str}`;
-            elText.textContent = str;
+            // 1. Update End Time Display (New requirement)
+            elEndTime.textContent = formatEndTime(timer.endTime);
 
-            // Circle (2*PI*90 = 565)
-            const pct = Math.max(0, timer.remainingMs / timer.totalMs);
-            elProgress.style.strokeDashoffset = 565 - (565 * pct);
+            // 2. Update Time Text
+            elText.textContent = formatTimerDisplay(timer.remainingMs, timer.isOvertime);
 
-            // Labels & Finished State
-            if (timer.finished) {
-                elCard.classList.add('finished');
-                elEnd.textContent = "終了";
-                if(elIcon) elIcon.className = 'bi bi-stop-fill'; // 停止（リセット）アイコンに変更
+            // 3. Handle Overtime Styles and Progress
+            if (timer.isOvertime) {
+                elCard.classList.add('overtime');
+                elProgress.style.strokeDashoffset = 0; 
+                elProgress.style.stroke = 'var(--md-sys-color-error)';
             } else {
-                elCard.classList.remove('finished');
-                if (timer.running) {
-                    elEnd.innerHTML = `<i class="bi bi-bell-fill"></i> ${getEndTimeString(timer.endTime)}`;
-                    if(elIcon) elIcon.className = 'bi bi-pause-fill';
-                }
-                else {
-                    elEnd.textContent = "一時停止中";
-                    if(elIcon) elIcon.className = 'bi bi-play-fill';
-                }
+                elCard.classList.remove('overtime');
+                elProgress.style.stroke = 'var(--md-sys-color-primary)';
+                // Progress (2*PI*72 = 452)
+                const pct = Math.max(0, timer.remainingMs / timer.totalMs);
+                elProgress.style.strokeDashoffset = 452 - (452 * pct);
             }
         }
 
         function globalTimerLoop() {
             const now = Date.now();
-            let hasActive = false;
+            let hasTimers = false;
 
             appState.timers.forEach(timer => {
-                // finished状態のタイマーもUI更新やアラーム継続のために監視対象とする
-                if (!timer.finished) {
-                    hasActive = true;
-                    if (timer.running) {
-                        const left = timer.endTime - now;
-                        if (left <= 0) {
-                            // Finished!
-                            timer.remainingMs = 0;
-                            timer.finished = true;
-                            timer.running = false;
-                            
-                            // Start Alarm
-                            playAlarm(); // Play once immediately
-                            timer.alarmInterval = setInterval(playAlarm, 1500); // Repeat every 1.5s
-                        } else {
-                            timer.remainingMs = left;
-                        }
+                hasTimers = true;
+                if (timer.running) {
+                    const left = timer.endTime - now;
+                    
+                    if (left <= 0 && !timer.isOvertime) {
+                        // Just crossed 0
+                        timer.isOvertime = true;
+                        timer.remainingMs = left;
+                        playAlarm(); 
+                        timer.alarmInterval = setInterval(playAlarm, 1500);
+                    } else if (timer.isOvertime) {
+                         // Continue negative counting
+                         timer.remainingMs = left;
+                    } else {
+                        // Normal positive counting
+                        timer.remainingMs = left;
                     }
-                    updateTimerUI(timer);
-                } else {
-                    // 終了後もUI（点滅など）のために更新が必要な場合ここに記述
                 }
+                updateTimerUI(timer);
             });
 
-            if (appState.timers.length > 0) {
+            if (hasTimers) {
                 requestAnimationFrame(globalTimerLoop);
             }
         }
@@ -935,11 +1065,20 @@
         const modal = document.getElementById('settings-modal');
         const chkSound = document.getElementById('setting-sound');
         const chkDate = document.getElementById('setting-date');
+        const rngPrecision = document.getElementById('setting-precision');
+        const txtPrecision = document.getElementById('precision-val');
 
         function openSettings() {
             modal.classList.add('open');
+            // Load current settings
             chkSound.checked = appState.settings.sound;
             chkDate.checked = appState.settings.showDate;
+            rngPrecision.value = appState.settings.swPrecision;
+            txtPrecision.innerText = appState.settings.swPrecision;
+        }
+        function updatePrecisionDisplay() {
+            // Update the display text as the user moves the slider
+            txtPrecision.innerText = rngPrecision.value;
         }
         function closeSettings(e) {
             if (e.target === modal) { saveSettings(); modal.classList.remove('open'); }
@@ -950,8 +1089,22 @@
         function saveSettings() {
             appState.settings.sound = chkSound.checked;
             appState.settings.showDate = chkDate.checked;
-            // Update UI for all timers to reflect date format change
+            appState.settings.swPrecision = parseInt(rngPrecision.value);
+            
+            // Refresh StopWatch display immediately
+            if (!swRunning) swDisplay.innerHTML = formatSwTime(swElapsed);
+            
+            // Refresh all Timer UIs to update End Time format
             appState.timers.forEach(t => updateTimerUI(t));
+        }
+        
+        // Initial setup for stopwatch display
+        window.onload = () => {
+             // Set initial display for stopwatch based on default settings
+             swDisplay.innerHTML = formatSwTime(0);
+             // Ensure initial precision display is correct
+             rngPrecision.value = appState.settings.swPrecision;
+             txtPrecision.innerText = appState.settings.swPrecision;
         }
 
     </script>
