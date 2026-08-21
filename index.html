@@ -224,6 +224,9 @@
     .volume-value { min-width: 39px; color: var(--muted); font: 500 12px var(--mono); text-align: right; }
     .preview-row { display: flex; justify-content: flex-end; margin-top: 8px; }
     .preview-button { min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; background: transparent; color: var(--primary); cursor: pointer; font-size: 12px; font-weight: 800; }
+    .lap-speed-presets { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .lap-speed-button { min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); color: var(--muted); cursor: pointer; font: 500 12px var(--mono); }
+    .lap-speed-button.active { border-color: color-mix(in srgb, var(--primary) 62%, var(--line)); background: color-mix(in srgb, var(--primary) 13%, var(--surface-raised)); color: var(--primary); }
 
     @media (max-width: 700px) {
       .app-shell { padding: 15px 16px 104px; }
@@ -381,6 +384,12 @@
         <div class="preview-row"><button class="preview-button" id="preview-sound" type="button"><i class="bi bi-volume-up"></i> 試聴する</button></div>
       </div>
       <div class="settings-group">
+        <p class="setting-title">Space長押しのラップ速度</p>
+        <p class="setting-help">単押しは1回だけ記録します。長押しを検知した後の連続ラップ間隔を調整できます。</p>
+        <div class="volume-row"><input id="lap-repeat-speed" type="range" min="0" max="1000" step="10" value="0" aria-label="Space長押しのラップ間隔"><output class="volume-value" id="lap-repeat-speed-value">0ms</output></div>
+        <div class="lap-speed-presets" aria-label="ラップ速度のプリセット"><button class="lap-speed-button" type="button" data-lap-speed="0">0ms</button><button class="lap-speed-button" type="button" data-lap-speed="50">50ms</button><button class="lap-speed-button" type="button" data-lap-speed="120">120ms</button><button class="lap-speed-button" type="button" data-lap-speed="250">250ms</button><button class="lap-speed-button" type="button" data-lap-speed="500">500ms</button></div>
+      </div>
+      <div class="settings-group">
         <div class="setting-line"><div><p class="setting-title">終了時刻に日付を表示</p><p class="setting-help">日付をまたぐタイマーにも便利です。</p></div><label class="switch"><input id="show-date" type="checkbox"><span></span><span class="sr-only">終了時刻に日付を表示する</span></label></div>
       </div>
     </section>
@@ -396,7 +405,7 @@
       const perfNow = () => performance.now();
 
       const appState = {
-        settings: { sound: true, tone: 'gentle', volume: 28, showDate: false, theme: 'dark' },
+        settings: { sound: true, tone: 'gentle', volume: 28, lapRepeatMs: 0, showDate: false, theme: 'dark' },
         timers: []
       };
       const LAP_RENDER_LIMIT = 40;
@@ -406,6 +415,7 @@
       let audioContext = null;
       let audioUnlocked = false;
       let spaceHeld = false;
+      let spaceRepeatId = null;
 
       const elements = {
         themeButton: $('#theme-button'),
@@ -415,7 +425,7 @@
         timerGrid: $('#timer-grid'), noTimers: $('#no-timers'), timerMetrics: $('#timer-metrics'), toggleAllButton: $('#toggle-all-button'), audioUnlockButton: $('#audio-unlock-button'), audioStatus: $('#audio-status'),
         builderModal: $('#builder-modal'), settingsModal: $('#settings-modal'),
         timerForm: $('#timer-form'), timerName: $('#timer-name'), timerHours: $('#timer-hours'), timerMinutes: $('#timer-minutes'), timerSeconds: $('#timer-seconds'), timerError: $('#timer-form-error'),
-        soundEnabled: $('#sound-enabled'), soundVolume: $('#sound-volume'), soundVolumeValue: $('#sound-volume-value'), showDate: $('#show-date')
+        soundEnabled: $('#sound-enabled'), soundVolume: $('#sound-volume'), soundVolumeValue: $('#sound-volume-value'), lapRepeatSpeed: $('#lap-repeat-speed'), lapRepeatSpeedValue: $('#lap-repeat-speed-value'), showDate: $('#show-date')
       };
 
       function persist() {
@@ -429,6 +439,7 @@
           if (!saved) return;
           Object.assign(appState.settings, saved.settings || {});
           appState.settings.volume = Math.min(80, Math.max(5, Number(appState.settings.volume) || 28));
+          appState.settings.lapRepeatMs = Math.min(1000, Math.max(0, Number(appState.settings.lapRepeatMs) || 0));
           appState.timers = Array.isArray(saved.timers) ? saved.timers.map(timer => ({
             id: String(timer.id), label: String(timer.label || 'タイマー'), totalMs: Math.max(1000, Number(timer.totalMs) || 60000),
             remainingMs: Math.max(0, Number(timer.remainingMs) || 0), endAt: Number(timer.endAt) || 0,
@@ -799,10 +810,18 @@
       function closeModal(id) { const modal = $(`#${id}`); modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); }
       function isModalOpen() { return $$('.modal.open').length > 0; }
 
+      function updateLapRepeatSpeedUI() {
+        const value = appState.settings.lapRepeatMs;
+        elements.lapRepeatSpeed.value = String(value);
+        elements.lapRepeatSpeedValue.textContent = `${value}ms`;
+        $$('[data-lap-speed]').forEach(button => button.classList.toggle('active', Number(button.dataset.lapSpeed) === value));
+      }
+
       function syncSettingsControls() {
         elements.soundEnabled.checked = appState.settings.sound;
         elements.soundVolume.value = appState.settings.volume;
         elements.soundVolumeValue.textContent = `${appState.settings.volume}%`;
+        updateLapRepeatSpeedUI();
         elements.showDate.checked = appState.settings.showDate;
         const tone = $(`input[name="tone"][value="${appState.settings.tone}"]`);
         if (tone) tone.checked = true;
@@ -821,7 +840,20 @@
         return activeScreen === 'stopwatch' && stopwatch.running && !isModalOpen() && !target.closest('input, textarea, select, a, [contenteditable="true"]');
       }
 
-      function stopSpaceHold() { spaceHeld = false; }
+      function stopSpaceHold() {
+        spaceHeld = false;
+        if (spaceRepeatId !== null) clearInterval(spaceRepeatId);
+        spaceRepeatId = null;
+      }
+
+      function startConfiguredLapRepeat() {
+        if (!spaceHeld || spaceRepeatId !== null) return;
+        addLap();
+        spaceRepeatId = setInterval(() => {
+          if (!spaceHeld || !stopwatch.running || activeScreen !== 'stopwatch' || isModalOpen()) { stopSpaceHold(); return; }
+          addLap();
+        }, appState.settings.lapRepeatMs);
+      }
 
       document.addEventListener('keydown', event => {
         if (event.code !== 'Space' || !canHandleSpaceLap(event.target)) return;
@@ -831,7 +863,7 @@
           addLap();
           return;
         }
-        if (spaceHeld) addLap();
+        startConfiguredLapRepeat();
       });
       document.addEventListener('keyup', event => { if (event.code === 'Space') stopSpaceHold(); });
       window.addEventListener('blur', stopSpaceHold);
@@ -872,6 +904,8 @@
       elements.soundEnabled.addEventListener('change', event => { appState.settings.sound = event.target.checked; saveSettings(); });
       elements.showDate.addEventListener('change', event => { appState.settings.showDate = event.target.checked; saveSettings(); });
       elements.soundVolume.addEventListener('input', event => { appState.settings.volume = Number(event.target.value); elements.soundVolumeValue.textContent = `${appState.settings.volume}%`; saveSettings(); });
+      elements.lapRepeatSpeed.addEventListener('input', event => { appState.settings.lapRepeatMs = Math.min(1000, Math.max(0, Number(event.target.value) || 0)); updateLapRepeatSpeedUI(); saveSettings(); });
+      $$('[data-lap-speed]').forEach(button => button.addEventListener('click', () => { appState.settings.lapRepeatMs = Number(button.dataset.lapSpeed); updateLapRepeatSpeedUI(); saveSettings(); }));
       $$('input[name="tone"]').forEach(input => input.addEventListener('change', event => { appState.settings.tone = event.target.value; saveSettings(); }));
       $('#preview-sound').addEventListener('click', () => { void unlockAudio({ preview: true }); });
 
