@@ -1,1113 +1,767 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>タイマー&ストップウォッチ</title>
-    
-    <!-- Fonts: Outfit (Geometry compatible) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap Icons (CDN) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10182b">
+  <title>Tempo — タイマー & ストップウォッチ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10182b;
+      --bg-2: #17223c;
+      --surface: rgba(24, 35, 61, .78);
+      --surface-solid: #1a2643;
+      --surface-raised: #233354;
+      --text: #f5f7ff;
+      --muted: #aab6d2;
+      --subtle: #7483a7;
+      --line: rgba(218, 229, 255, .12);
+      --primary: #8de6c2;
+      --primary-strong: #59d5a8;
+      --primary-ink: #09271d;
+      --accent: #9eb7ff;
+      --danger: #ff9f9d;
+      --warning: #ffd492;
+      --shadow: 0 24px 70px rgba(3, 9, 24, .38);
+      --font: "Manrope", system-ui, sans-serif;
+      --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
 
-    <style>
-        /* --- Pixel Theme Variables --- */
-        :root {
-            --md-sys-color-background: #fdfcff;
-            --md-sys-color-on-background: #1a1c1e;
-            --md-sys-color-surface: #fdfcff;
-            --md-sys-color-surface-container: #f0f4f8;
-            --md-sys-color-surface-variant: #e1e2ec;
-            
-            --md-sys-color-primary: #006492;
-            --md-sys-color-on-primary: #ffffff;
-            --md-sys-color-primary-container: #cae6ff;
-            --md-sys-color-on-primary-container: #001e30;
+    [data-theme="light"] {
+      color-scheme: light;
+      --bg: #f3f6fc;
+      --bg-2: #e6ebf7;
+      --surface: rgba(255, 255, 255, .82);
+      --surface-solid: #ffffff;
+      --surface-raised: #edf2fb;
+      --text: #17213b;
+      --muted: #5d6c8b;
+      --subtle: #7886a1;
+      --line: rgba(36, 52, 83, .12);
+      --primary: #2ba578;
+      --primary-strong: #16855d;
+      --primary-ink: #ffffff;
+      --accent: #526fd3;
+      --danger: #d9585e;
+      --warning: #a56813;
+      --shadow: 0 24px 60px rgba(45, 62, 101, .14);
+    }
 
-            --md-sys-color-secondary-container: #dce2f9;
-            --md-sys-color-on-secondary-container: #151b2c;
-            
-            --md-sys-color-error: #ba1a1a;
-            --md-sys-color-error-container: #ffdad6;
-            --md-sys-color-on-error-container: #410002;
-            
-            --md-sys-color-outline: #74777f;
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      min-width: 320px; min-height: 100vh; min-height: 100dvh; margin: 0;
+      overflow-x: hidden; background:
+        radial-gradient(circle at 8% 1%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 28rem),
+        radial-gradient(circle at 90% 12%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 26rem),
+        linear-gradient(135deg, var(--bg), var(--bg-2));
+      color: var(--text); font: 500 15px/1.5 var(--font); letter-spacing: -.01em;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 72%, white); outline-offset: 3px; }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-            --font-family: 'Outfit', sans-serif;
-        }
+    .app-shell { width: min(100%, 1120px); min-height: 100dvh; margin: auto; padding: 18px 20px 110px; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 2px 0 22px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .brand-mark { display: grid; width: 35px; height: 35px; place-items: center; border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); box-shadow: inset 0 1px rgba(255,255,255,.13); font-size: 18px; }
+    .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.045em; }
+    .brand-sub { display: block; margin-top: -2px; color: var(--subtle); font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+    .icon-button, .mini-button { display: inline-grid; place-items: center; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface-solid) 68%, transparent); color: var(--text); cursor: pointer; transition: transform .16s ease, background .16s ease, border-color .16s ease; }
+    .icon-button { width: 46px; height: 46px; border-radius: 15px; font-size: 19px; }
+    .icon-button:hover, .mini-button:hover { transform: translateY(-1px); background: var(--surface-raised); border-color: color-mix(in srgb, var(--primary) 42%, var(--line)); }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --md-sys-color-background: #000000;
-                --md-sys-color-on-background: #e2e2e6;
-                --md-sys-color-surface: #1a1c1e;
-                --md-sys-color-surface-container: #1e222b;
-                --md-sys-color-surface-variant: #44474f;
-                
-                --md-sys-color-primary: #8cceea;
-                --md-sys-color-on-primary: #00344e;
-                --md-sys-color-primary-container: #004b6f;
-                --md-sys-color-on-primary-container: #cae6ff;
+    main { position: relative; }
+    .screen { display: none; animation: enter .36s cubic-bezier(.2,.8,.2,1); }
+    .screen.active { display: block; }
+    @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .eyebrow { margin: 0 0 6px; color: var(--primary); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 6px; font-size: clamp(29px, 5vw, 42px); line-height: 1.12; letter-spacing: -.055em; }
+    .screen-description { margin-bottom: 24px; color: var(--muted); }
 
-                --md-sys-color-secondary-container: #3e4856;
-                --md-sys-color-on-secondary-container: #dce2f9;
-                
-                --md-sys-color-error: #ffb4ab;
-                --md-sys-color-error-container: #93000a;
-                --md-sys-color-on-error-container: #ffdad6;
-                
-                --md-sys-color-outline: #8e9099;
-            }
-        }
+    .stopwatch-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 20px; align-items: stretch; }
+    .clock-card, .panel, .timer-card, .builder-sheet, .settings-sheet { border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .clock-card { position: relative; display: flex; min-height: 440px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: clamp(26px, 5vw, 44px); border-radius: 32px; }
+    .clock-card::after { position: absolute; top: -105px; right: -100px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--primary) 25%, transparent), transparent 69%); content: ""; pointer-events: none; }
+    .state-chip { position: relative; z-index: 1; display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 7px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .state-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle); }
+    .state-chip.running .state-dot { background: var(--primary); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 16%, transparent); }
+    .time-display { position: relative; z-index: 1; overflow: hidden; color: var(--text); font: 500 clamp(47px, 8.7vw, 91px)/1 var(--mono); letter-spacing: -.085em; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: center; }
+    .time-caption { position: relative; z-index: 1; margin: 12px 0 0; color: var(--subtle); font-size: 12px; font-weight: 700; text-align: center; }
+    .stopwatch-controls { position: relative; z-index: 1; display: grid; grid-template-columns: 58px 1fr 58px; gap: 12px; align-items: center; touch-action: manipulation; }
+    .action-button { min-height: 58px; border: 0; border-radius: 18px; cursor: pointer; font-weight: 800; transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+    .action-button:hover { transform: translateY(-2px); }
+    .action-button:active { transform: translateY(0) scale(.98); }
+    .action-primary { display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: var(--primary); color: var(--primary-ink); box-shadow: 0 9px 20px color-mix(in srgb, var(--primary) 25%, transparent); font-size: 16px; }
+    .action-secondary { display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface-raised); color: var(--text); font-size: 20px; }
+    .action-secondary:hover { border-color: color-mix(in srgb, var(--primary) 42%, var(--line)); }
+    .shortcut-hint { position: relative; z-index: 1; margin: 14px 0 0; color: var(--subtle); font-size: 12px; text-align: center; }
+    kbd { display: inline-block; min-width: 22px; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--surface-raised); color: var(--muted); font: 500 11px var(--mono); }
 
-        /* --- Reset & Base --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body {
-            margin: 0; padding: 0;
-            font-family: var(--font-family);
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-background);
-            height: 100dvh;
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            transition: background-color 0.4s, color 0.4s;
-        }
+    .panel { min-height: 440px; padding: 22px; border-radius: 28px; }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .panel-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; }
+    .text-button { padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--primary); cursor: pointer; font-size: 12px; font-weight: 800; }
+    .text-button:hover { background: color-mix(in srgb, var(--primary) 11%, transparent); }
+    .lap-list { display: flex; max-height: 354px; flex-direction: column; gap: 8px; overflow: auto; padding-right: 2px; touch-action: manipulation; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+    .empty-state { display: grid; min-height: 255px; place-items: center; padding: 25px; border: 1px dashed var(--line); border-radius: 18px; color: var(--subtle); text-align: center; }
+    .empty-state i { display: block; margin-bottom: 8px; color: var(--accent); font-size: 24px; }
+    .empty-state p { margin: 0; font-size: 13px; }
+    .lap-item { display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; align-items: center; min-height: 58px; padding: 10px 12px; border: 1px solid transparent; border-radius: 16px; background: color-mix(in srgb, var(--surface-raised) 72%, transparent); animation: lap-in .3s ease; }
+    @keyframes lap-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+    .lap-index { color: var(--subtle); font: 500 12px var(--mono); }
+    .lap-main { min-width: 0; }
+    .lap-total { overflow: hidden; font: 500 15px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+    .lap-split { color: var(--muted); font: 500 11px var(--mono); }
+    .lap-badge { padding: 4px 7px; border-radius: 6px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .lap-badge.fastest { background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); }
+    .lap-badge.slowest { background: color-mix(in srgb, var(--warning) 16%, transparent); color: var(--warning); }
+    .lap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 14px; }
+    .stat { padding: 11px 10px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface-raised) 52%, transparent); }
+    .stat-label { display: block; margin-bottom: 3px; color: var(--subtle); font-size: 10px; font-weight: 800; letter-spacing: .05em; }
+    .stat-value { display: block; overflow: hidden; font: 500 12px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
 
-        /* --- Animations --- */
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulseAlert {
-            0% { background-color: var(--md-sys-color-error-container); }
-            50% { background-color: var(--md-sys-color-error); }
-            100% { background-color: var(--md-sys-color-error-container); }
-        }
+    .timer-header-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 19px; }
+    .header-actions { display: flex; align-items: center; gap: 9px; }
+    .timer-header-row .screen-description { margin-bottom: 0; }
+    .quick-section { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 0 0 20px; }
+    .quick-label { margin-right: 2px; color: var(--subtle); font-size: 12px; font-weight: 800; }
+    .quick-button { min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 64%, transparent); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 800; transition: .16s ease; touch-action: manipulation; }
+    .quick-button:hover { border-color: color-mix(in srgb, var(--primary) 50%, var(--line)); background: color-mix(in srgb, var(--primary) 12%, var(--surface)); color: var(--primary); transform: translateY(-1px); }
+    .timer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(285px, 1fr)); gap: 16px; }
+    .timer-card { position: relative; display: flex; min-height: 258px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 20px; border-radius: 26px; transition: transform .2s ease, border-color .2s ease; }
+    .timer-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 30%, var(--line)); }
+    .timer-card.done { border-color: color-mix(in srgb, var(--warning) 55%, var(--line)); background: color-mix(in srgb, var(--warning) 9%, var(--surface)); }
+    .timer-card.finished { opacity: .82; }
+    .timer-topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .timer-name { overflow: hidden; margin: 0; font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .timer-status { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .timer-status::before { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle); content: ""; }
+    .timer-status.running::before { background: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent); }
+    .timer-status.done::before { background: var(--warning); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 14%, transparent); }
+    .timer-middle { display: flex; align-items: center; gap: 18px; }
+    .timer-ring { display: grid; width: 114px; height: 114px; flex: 0 0 114px; place-items: center; border-radius: 50%; background: conic-gradient(var(--primary) var(--progress), color-mix(in srgb, var(--surface-raised) 84%, transparent) 0); }
+    .timer-card.done .timer-ring { background: conic-gradient(var(--warning) var(--progress), color-mix(in srgb, var(--surface-raised) 84%, transparent) 0); }
+    .timer-ring::before { position: absolute; width: 94px; height: 94px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-solid); content: ""; }
+    .timer-value { position: relative; z-index: 1; font: 500 23px/1 var(--mono); letter-spacing: -.07em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .timer-context { min-width: 0; }
+    .end-label { margin: 0 0 5px; color: var(--subtle); font-size: 11px; font-weight: 800; }
+    .end-value { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .timer-actions { display: grid; grid-template-columns: 1fr 46px 46px; gap: 9px; touch-action: manipulation; }
+    .timer-actions .action-primary { min-height: 50px; border-radius: 15px; font-size: 14px; }
+    .timer-actions .action-secondary { min-height: 50px; border-radius: 15px; font-size: 18px; }
+    .timer-actions .delete-button:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, var(--line)); }
+    .no-timers { display: grid; min-height: 310px; place-items: center; padding: 35px; border: 1px dashed var(--line); border-radius: 28px; background: color-mix(in srgb, var(--surface) 50%, transparent); text-align: center; }
+    .no-timers[hidden] { display: none; }
+    .no-timers i { display: block; margin-bottom: 12px; color: var(--primary); font-size: 30px; }
+    .no-timers h2 { margin-bottom: 5px; font-size: 18px; }
+    .no-timers p { max-width: 290px; margin: 0; color: var(--muted); font-size: 13px; }
+    .add-timer-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 9px; margin-top: 16px; padding: 0 17px; border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--primary) 13%, transparent); color: var(--primary); cursor: pointer; font-weight: 800; }
+    .add-timer-button:hover { background: color-mix(in srgb, var(--primary) 21%, transparent); }
 
-        /* --- Layout --- */
-        main {
-            flex: 1; position: relative; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
+    .nav-bar { position: fixed; z-index: 20; bottom: max(12px, env(safe-area-inset-bottom)); left: 50%; display: flex; width: min(calc(100% - 32px), 430px); min-height: 70px; align-items: center; justify-content: space-around; padding: 7px; border: 1px solid var(--line); border-radius: 23px; background: color-mix(in srgb, var(--surface-solid) 88%, transparent); box-shadow: 0 14px 34px rgba(3, 9, 24, .32); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); transform: translateX(-50%); }
+    .nav-item { display: inline-flex; min-width: 136px; min-height: 54px; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 0; border-radius: 17px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 800; transition: .18s ease; touch-action: manipulation; }
+    .nav-item i { font-size: 19px; }
+    .nav-item.active { background: var(--surface-raised); color: var(--text); }
+    .nav-item.active i { color: var(--primary); }
 
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center;
-            opacity: 0; pointer-events: none; visibility: hidden;
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1), visibility 0.3s;
-            transform: scale(0.95);
-            background-color: var(--md-sys-color-background);
-            z-index: 1;
-        }
-        .screen.active {
-            opacity: 1; pointer-events: auto; visibility: visible;
-            transform: scale(1); z-index: 5;
-        }
+    .modal { position: fixed; z-index: 60; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 16px; background: rgba(6, 10, 23, .58); opacity: 0; pointer-events: none; transition: opacity .22s ease; }
+    .modal.open { opacity: 1; pointer-events: auto; }
+    .builder-sheet, .settings-sheet { width: min(100%, 540px); max-height: min(84dvh, 760px); overflow: auto; padding: 24px; border-radius: 28px; transform: translateY(24px); transition: transform .27s cubic-bezier(.2,.8,.2,1); }
+    .modal.open .builder-sheet, .modal.open .settings-sheet { transform: none; }
+    .sheet-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 23px; }
+    .sheet-heading h2 { margin: 0 0 4px; font-size: 22px; letter-spacing: -.045em; }
+    .sheet-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+    .close-button { flex: 0 0 auto; }
+    .form-label { display: block; margin: 0 0 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .name-input { width: 100%; min-height: 49px; margin-bottom: 19px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-raised); color: var(--text); }
+    .time-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 10px; }
+    .time-field { min-width: 0; }
+    .time-field input { width: 100%; min-height: 70px; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-raised); color: var(--text); font: 500 28px var(--mono); text-align: center; font-variant-numeric: tabular-nums; }
+    .time-field span { display: block; margin-top: 6px; color: var(--subtle); font-size: 11px; font-weight: 800; text-align: center; }
+    .form-error { min-height: 20px; margin: 0 0 8px; color: var(--danger); font-size: 12px; font-weight: 700; }
+    .sheet-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 18px; }
+    .sheet-actions button { min-height: 52px; border-radius: 16px; }
+    .plain-button { border: 1px solid var(--line); background: var(--surface-raised); color: var(--text); cursor: pointer; font-weight: 800; }
+    .settings-group { padding: 17px 0; border-top: 1px solid var(--line); }
+    .settings-group:first-of-type { border-top: 0; padding-top: 0; }
+    .setting-line { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .setting-title { margin: 0; font-size: 14px; font-weight: 800; }
+    .setting-help { margin: 3px 0 0; color: var(--subtle); font-size: 12px; }
+    .switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 49px; height: 30px; align-items: center; padding: 3px; border-radius: 999px; background: var(--surface-raised); cursor: pointer; }
+    .switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .switch span { width: 24px; height: 24px; border-radius: 50%; background: var(--muted); transition: transform .2s ease, background .2s ease; }
+    .switch input:checked + span { background: var(--primary); transform: translateX(19px); }
+    .tone-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 13px; }
+    .tone-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .tone-option span { display: grid; min-height: 64px; place-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-raised); color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 800; text-align: center; }
+    .tone-option input:checked + span { border-color: color-mix(in srgb, var(--primary) 62%, var(--line)); background: color-mix(in srgb, var(--primary) 13%, var(--surface-raised)); color: var(--primary); }
+    .volume-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 13px; }
+    input[type="range"] { width: 100%; accent-color: var(--primary); }
+    .volume-value { min-width: 39px; color: var(--muted); font: 500 12px var(--mono); text-align: right; }
+    .preview-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .preview-button { min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; background: transparent; color: var(--primary); cursor: pointer; font-size: 12px; font-weight: 800; }
 
-        /* Header */
-        .header {
-            width: 100%; padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; height: 56px; flex-shrink: 0;
-        }
-        .icon-btn {
-            background: none; border: none; color: var(--md-sys-color-on-background);
-            cursor: pointer; padding: 12px; border-radius: 50%;
-            transition: background-color 0.2s;
-            font-size: 24px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .icon-btn:active { background-color: var(--md-sys-color-surface-variant); }
-
-        /* Typography */
-        .display-large {
-            font-size: 80px; font-weight: 200; line-height: 1; letter-spacing: -2px;
-            font-variant-numeric: tabular-nums; margin: 10px 0;
-            color: var(--md-sys-color-on-background);
-            text-align: center; white-space: nowrap;
-        }
-        @media (max-width: 450px) {
-            .display-large { font-size: 52px; letter-spacing: -1px; }
-        }
-
-        /* --- Buttons --- */
-        .controls-wrapper {
-            width: 100%; padding: 24px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: auto; flex-shrink: 0;
-        }
-        
-        .btn {
-            border: none; outline: none; cursor: pointer;
-            font-family: var(--font-family); font-weight: 500; font-size: 16px;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
-            transition: transform 0.1s, background-color 0.3s;
-        }
-        .btn:active { transform: scale(0.96); }
-
-        .btn-play {
-            width: 110px; height: 72px; border-radius: 36px;
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            font-size: 32px;
-        }
-        .btn-secondary {
-            width: 72px; height: 72px; border-radius: 50%;
-            background-color: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-background);
-            font-size: 24px;
-        }
-        .btn-fab {
-            position: absolute; bottom: 24px; right: 24px;
-            width: 64px; height: 64px; border-radius: 22px;
-            background-color: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 10;
-            font-size: 28px;
-        }
-
-        /* --- Navigation --- */
-        .nav-bar {
-            background-color: var(--md-sys-color-surface-container);
-            height: 80px; display: flex; justify-content: space-around; align-items: center;
-            z-index: 20; padding-bottom: 12px; flex-shrink: 0;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            border: none; background: transparent;
-            color: var(--md-sys-color-on-background);
-            font-family: var(--font-family); font-size: 12px; font-weight: 500;
-            gap: 6px; opacity: 0.5; transition: opacity 0.2s; cursor: pointer;
-        }
-        .nav-icon-container {
-            width: 64px; height: 32px; border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            transition: background-color 0.2s;
-            font-size: 20px;
-        }
-        .nav-item.active { opacity: 1; }
-        .nav-item.active .nav-icon-container {
-            background-color: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
-        }
-
-        /* --- STOPWATCH --- */
-        .lap-list {
-            flex: 1; width: 94%; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px;
-            scrollbar-width: none;
-        }
-        .lap-list::-webkit-scrollbar { display: none; }
-        
-        .lap-card {
-            background-color: var(--md-sys-color-surface-container);
-            padding: 12px 20px; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 16px; font-variant-numeric: tabular-nums;
-            animation: slideInUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
-            flex-shrink: 0;
-        }
-        .lap-num { color: var(--md-sys-color-primary); font-weight: 600; width: 40px; }
-        .lap-time { flex: 1; text-align: left; }
-        .lap-diff { font-size: 0.85em; opacity: 0.7; margin-left: 8px; }
-        .lap-del-btn {
-            background: none; border: none; color: var(--md-sys-color-outline);
-            padding: 8px; cursor: pointer; font-size: 18px;
-        }
-        .lap-del-btn:active { color: var(--md-sys-color-error); }
-
-        /* --- TIMER CARD (HORIZONTAL LAYOUT) --- */
-        .timer-list-container {
-            flex: 1; width: 100%; overflow-y: auto;
-            padding: 10px 16px 100px 16px;
-            display: flex; flex-direction: column; gap: 16px; align-items: center;
-        }
-        
-        .timer-card {
-            width: 100%; max-width: 460px; /* Wider for side-by-side */
-            background-color: var(--md-sys-color-surface-container);
-            border-radius: 32px; padding: 16px 24px;
-            position: relative;
-            display: flex; flex-direction: row; /* Horizontal */
-            align-items: center; justify-content: space-between;
-            transition: background-color 0.3s;
-            animation: slideInUp 0.4s cubic-bezier(0.2, 0, 0, 1) forwards;
-            flex-shrink: 0;
-        }
-        .timer-card.overtime {
-            background-color: var(--md-sys-color-error-container);
-            color: var(--md-sys-color-on-error-container);
-            animation: pulseAlert 1.5s infinite;
-        }
-        .timer-card.overtime .circle-progress { stroke: var(--md-sys-color-error); }
-        .timer-card.overtime .circle-bg { stroke: rgba(0,0,0,0.1); }
-
-        /* Left Side: Circle & Time */
-        .card-circle-container { 
-            width: 160px; height: 160px; position: relative; flex-shrink: 0;
-        }
-        svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-        circle { fill: none; stroke-width: 8; stroke-linecap: round; }
-        .circle-bg { stroke: var(--md-sys-color-surface-variant); }
-        .circle-progress {
-            stroke: var(--md-sys-color-primary);
-            stroke-dasharray: 452; /* 2*PI*72 */
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 0.1s linear;
-        }
-        
-        .timer-card-time {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .time-text { 
-            font-size: 40px; font-weight: 300; line-height: 1; 
-            letter-spacing: -1px; white-space: nowrap; 
-            margin-top: 10px; /* Adjust for end time */
-        }
-        
-        /* End Time Display */
-        .end-time-display {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--md-sys-color-primary);
-            opacity: 0.8;
-            position: absolute;
-            top: 25px; /* Positioned above the time text/reset button */
-            white-space: nowrap;
-        }
-
-        /* Reset Button (Inside Circle, under time) */
-        .btn-reset-internal {
-            margin-top: 8px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(0,0,0,0.05); color: inherit;
-            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 18px; transition: background 0.2s;
-        }
-        .btn-reset-internal:active { background: rgba(0,0,0,0.1); }
-        
-        /* Right Side: Controls */
-        .timer-card-controls {
-            display: flex; flex-direction: column; /* Vertical */
-            gap: 12px; margin-left: 20px; align-items: center; justify-content: center;
-            flex: 1;
-        }
-        
-        .control-btn-main {
-            width: 64px; height: 64px; border-radius: 20px;
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border: none; font-size: 28px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .control-btn-sub {
-            width: 56px; height: 56px; border-radius: 18px;
-            background: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-background);
-            border: none; font-size: 22px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .control-text-btn {
-            background: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-background);
-            border: none; border-radius: 16px;
-            padding: 10px 16px; font-weight: 600; font-size: 14px;
-            cursor: pointer; width: 100%; max-width: 80px; text-align: center;
-        }
-        
-        /* Input Mode */
-        .timer-input-screen { background-color: var(--md-sys-color-background); z-index: 50; }
-        .input-display-area {
-            display: flex; flex-direction: column; align-items: center;
-            margin-top: 40px; margin-bottom: 20px; cursor: pointer;
-            padding: 20px; border-radius: 16px;
-            transition: background-color 0.2s; flex-shrink: 0;
-        }
-        .input-display-area:active { background-color: var(--md-sys-color-surface-container); }
-        
-        .timer-val-display {
-            font-size: 56px; font-weight: 300; color: var(--md-sys-color-primary);
-            font-variant-numeric: tabular-nums;
-        }
-        .timer-val-display.placeholder { color: var(--md-sys-color-surface-variant); }
-        
-        .numpad {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            width: 100%; max-width: 320px; padding: 0 10px; margin-bottom: 10px;
-        }
-        .num-btn {
-            height: 60px; border-radius: 30px; background: transparent;
-            color: var(--md-sys-color-on-background); font-size: 24px;
-            border: none; cursor: pointer; font-family: var(--font-family);
-        }
-        .num-btn:active { background-color: var(--md-sys-color-surface-variant); }
-        #hidden-input { position: absolute; opacity: 0; top: -1000px; }
-
-        /* --- Settings --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 100;
-            opacity: 0; pointer-events: none; visibility: hidden;
-            display: flex; justify-content: center; align-items: flex-end;
-            backdrop-filter: blur(2px); transition: opacity 0.3s;
-        }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; visibility: visible; }
-        
-        .settings-sheet {
-            width: 100%; max-width: 600px;
-            background: var(--md-sys-color-surface);
-            border-radius: 28px 28px 0 0; padding: 24px;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
-            max-height: 80vh; overflow-y: auto;
-        }
-        .modal-overlay.open .settings-sheet { transform: translateY(0); }
-        
-        .setting-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 18px 0; border-bottom: 1px solid var(--md-sys-color-surface-container);
-        }
-        .setting-label { font-size: 16px; font-weight: 500; }
-        .setting-sub { font-size: 12px; color: var(--md-sys-color-outline); margin-top: 4px; }
-        
-        .switch { position: relative; display: inline-block; width: 52px; height: 32px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider-toggle {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--md-sys-color-surface-variant);
-            border-radius: 32px; transition: .3s;
-            border: 2px solid var(--md-sys-color-outline); box-sizing: border-box;
-        }
-        .slider-toggle:before {
-            position: absolute; content: ""; height: 16px; width: 16px; left: 6px; bottom: 6px;
-            background-color: var(--md-sys-color-outline); border-radius: 50%; transition: .3s;
-        }
-        input:checked + .slider-toggle { background-color: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); }
-        input:checked + .slider-toggle:before {
-            background-color: var(--md-sys-color-on-primary); transform: translateX(20px);
-            height: 24px; width: 24px; left: 2px; bottom: 2px;
-        }
-        input[type=range] { width: 100%; max-width: 150px; accent-color: var(--md-sys-color-primary); }
-    </style>
+    @media (max-width: 700px) {
+      .app-shell { padding: 15px 16px 104px; }
+      .app-header { padding-bottom: 17px; }
+      .stopwatch-layout { grid-template-columns: 1fr; }
+      .clock-card { min-height: 365px; border-radius: 27px; }
+      .panel { min-height: auto; border-radius: 24px; }
+      .lap-list { max-height: 286px; }
+      .timer-header-row { align-items: flex-start; flex-direction: column; margin-bottom: 15px; }
+      .timer-grid { grid-template-columns: 1fr; }
+      .timer-card { min-height: 235px; }
+      .nav-item { min-width: 0; flex: 1; padding: 0 8px; font-size: 13px; }
+    }
+    @media (max-width: 390px) {
+      .brand-sub { display: none; }
+      .clock-card { padding: 24px 18px; }
+      .time-display { font-size: 42px; }
+      .stopwatch-controls { grid-template-columns: 54px 1fr 54px; gap: 8px; }
+      .timer-middle { gap: 12px; }
+      .timer-ring { width: 102px; height: 102px; flex-basis: 102px; }
+      .timer-ring::before { width: 84px; height: 84px; }
+      .timer-value { font-size: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
 </head>
 <body>
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="#stopwatch" aria-label="Tempo ホーム">
+        <span class="brand-mark"><i class="bi bi-hourglass-split"></i></span>
+        <span><span class="brand-name">Tempo</span><span class="brand-sub">time, made clear</span></span>
+      </a>
+      <button class="icon-button" id="theme-button" type="button" aria-label="配色を切り替える" title="配色を切り替える"><i class="bi bi-sun"></i></button>
+    </header>
 
     <main>
-        <!-- STOPWATCH SCREEN -->
-        <div id="stopwatch-screen" class="screen active">
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; width:100%; overflow: hidden;">
-                <div class="display-large" id="sw-display" style="margin-top:auto; margin-bottom: auto;">
-                    0.000
-                </div>
-                <div class="lap-list" id="sw-laps"></div>
+      <section class="screen active" id="stopwatch-screen" aria-labelledby="stopwatch-title">
+        <p class="eyebrow">Stopwatch</p>
+        <h1 id="stopwatch-title">いま、この一瞬を測る。</h1>
+        <p class="screen-description">ラップを記録して、リズムの違いまでひと目で確認できます。</p>
+        <div class="stopwatch-layout">
+          <section class="clock-card" aria-label="ストップウォッチ">
+            <div class="state-chip" id="sw-state"><span class="state-dot"></span><span id="sw-state-text">準備完了</span></div>
+            <div>
+              <output class="time-display" id="sw-display" aria-label="ストップウォッチの時間">00:00.000</output>
+              <p class="time-caption">精度は 1/1000 秒</p>
             </div>
-
-            <div class="controls-wrapper">
-                <button class="btn btn-secondary" id="sw-btn-reset" onclick="resetStopwatch()" style="opacity: 0; pointer-events: none;">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </button>
-                <button class="btn btn-play" id="sw-btn-main" onclick="toggleStopwatch()">
-                    <i class="bi bi-play-fill" id="sw-icon-main"></i>
-                </button>
-                <button class="btn btn-secondary" id="sw-btn-lap" onclick="lapStopwatch()" style="opacity: 0; pointer-events: none;">
-                    <i class="bi bi-flag-fill"></i>
-                </button>
+            <div>
+              <div class="stopwatch-controls">
+                <button class="action-button action-secondary" id="sw-reset" type="button" aria-label="ストップウォッチをリセット" title="リセット" disabled><i class="bi bi-arrow-counterclockwise"></i></button>
+                <button class="action-button action-primary" id="sw-main" type="button"><i class="bi bi-play-fill"></i><span>開始</span></button>
+                <button class="action-button action-secondary" id="sw-lap" type="button" aria-label="ラップを記録" title="ラップを記録" disabled><i class="bi bi-flag-fill"></i></button>
+              </div>
+              <p class="shortcut-hint">計測中は <kbd>Space</kbd> キーでもラップを記録できます</p>
             </div>
+            <p class="sr-only" id="sw-announcement" aria-live="polite"></p>
+          </section>
+          <aside class="panel" aria-labelledby="lap-title">
+            <div class="panel-heading">
+              <h2 id="lap-title">ラップ履歴</h2>
+              <button class="text-button" id="clear-laps" type="button" disabled>すべて消去</button>
+            </div>
+            <div class="lap-list" id="lap-list">
+              <div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>
+            </div>
+            <div class="lap-stats" aria-label="ラップの集計">
+              <div class="stat"><span class="stat-label">ラップ数</span><span class="stat-value" id="stat-count">0</span></div>
+              <div class="stat"><span class="stat-label">最速</span><span class="stat-value" id="stat-fastest">—</span></div>
+              <div class="stat"><span class="stat-label">最遅</span><span class="stat-value" id="stat-slowest">—</span></div>
+            </div>
+          </aside>
         </div>
+      </section>
 
-        <!-- TIMER LIST SCREEN -->
-        <div id="timer-list-screen" class="screen">
-            <div class="header">
-                <button class="icon-btn" onclick="openSettings()">
-                    <i class="bi bi-gear-fill"></i>
-                </button>
-            </div>
-
-            <div class="timer-list-container" id="timers-container">
-                <div id="no-timer-msg" style="margin-top:100px; color:var(--md-sys-color-outline);">
-                    タイマーを追加してください
-                </div>
-            </div>
-
-            <button class="btn btn-fab" onclick="showTimerInput()">
-                <i class="bi bi-plus-lg"></i>
-            </button>
+      <section class="screen" id="timer-screen" aria-labelledby="timer-title">
+        <div class="timer-header-row">
+          <div>
+            <p class="eyebrow">Timers</p>
+            <h1 id="timer-title">時間を、静かに味方に。</h1>
+            <p class="screen-description">複数のタイマーを並行して、確実に進められます。</p>
+          </div>
+          <div class="header-actions">
+            <button class="icon-button" id="add-timer-button" type="button" aria-label="タイマーを追加" title="タイマーを追加"><i class="bi bi-plus-lg"></i></button>
+            <button class="icon-button" id="settings-button" type="button" aria-label="タイマーの設定" title="設定"><i class="bi bi-sliders2"></i></button>
+          </div>
         </div>
-
-        <!-- TIMER INPUT OVERLAY -->
-        <div id="timer-input-screen" class="screen timer-input-screen">
-            <div class="header">
-                <button class="icon-btn" onclick="hideTimerInput()">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <div class="input-display-area" onclick="focusHiddenInput()">
-                <div class="timer-val-display placeholder" id="timer-input-display">00h 00m 00s</div>
-                <input type="tel" id="hidden-input" pattern="[0-9]*" inputmode="numeric">
-            </div>
-
-            <div class="numpad">
-                <button class="num-btn" onclick="numpadInput(1)">1</button>
-                <button class="num-btn" onclick="numpadInput(2)">2</button>
-                <button class="num-btn" onclick="numpadInput(3)">3</button>
-                <button class="num-btn" onclick="numpadInput(4)">4</button>
-                <button class="num-btn" onclick="numpadInput(5)">5</button>
-                <button class="num-btn" onclick="numpadInput(6)">6</button>
-                <button class="num-btn" onclick="numpadInput(7)">7</button>
-                <button class="num-btn" onclick="numpadInput(8)">8</button>
-                <button class="num-btn" onclick="numpadInput(9)">9</button>
-                <button class="num-btn" style="visibility:hidden"></button>
-                <button class="num-btn" onclick="numpadInput(0)">0</button>
-                <button class="num-btn" onclick="numpadDelete()"><i class="bi bi-backspace-fill"></i></button>
-            </div>
-            
-            <div class="controls-wrapper" style="justify-content: center;">
-                <button class="btn btn-play" id="tm-btn-create" onclick="createTimerFromInput()" style="opacity: 0.5; pointer-events: none;">
-                    <i class="bi bi-play-fill"></i>
-                </button>
-            </div>
+        <div class="quick-section" aria-label="クイックタイマー">
+          <span class="quick-label">クイック開始</span>
+          <button class="quick-button" type="button" data-quick-minutes="1">1分</button>
+          <button class="quick-button" type="button" data-quick-minutes="5">5分</button>
+          <button class="quick-button" type="button" data-quick-minutes="10">10分</button>
+          <button class="quick-button" type="button" data-quick-minutes="25">25分</button>
+          <button class="quick-button" type="button" data-quick-minutes="45">45分</button>
         </div>
+        <div class="timer-grid" id="timer-grid" aria-live="polite"></div>
+        <div class="no-timers" id="no-timers">
+          <div><i class="bi bi-hourglass"></i><h2>タイマーはまだありません</h2><p>よく使う時間はクイック開始で。細かな設定はタイマーを追加から行えます。</p><button class="add-timer-button" id="empty-add-timer" type="button"><i class="bi bi-plus-lg"></i>タイマーを追加</button></div>
+        </div>
+      </section>
     </main>
+  </div>
 
-    <!-- NAVIGATION -->
-    <nav class="nav-bar">
-        <button class="nav-item active" onclick="navTo('stopwatch', this)">
-            <div class="nav-icon-container">
-                <i class="bi bi-stopwatch"></i>
-            </div>
-            <span>ストップウォッチ</span>
-        </button>
-        <button class="nav-item" onclick="navTo('timer-list', this)">
-            <div class="nav-icon-container">
-                <i class="bi bi-hourglass-split"></i>
-            </div>
-            <span>タイマー</span>
-        </button>
-    </nav>
+  <nav class="nav-bar" aria-label="主な機能">
+    <button class="nav-item active" type="button" data-screen="stopwatch" aria-current="page"><i class="bi bi-stopwatch"></i><span>ストップウォッチ</span></button>
+    <button class="nav-item" type="button" data-screen="timer"><i class="bi bi-hourglass-split"></i><span>タイマー</span></button>
+  </nav>
 
-    <!-- SETTINGS MODAL -->
-    <div class="modal-overlay" id="settings-modal" onclick="closeSettings(event)">
-        <div class="settings-sheet" onclick="event.stopPropagation()">
-            <h2 style="margin-top:0; margin-bottom:20px; font-weight:400; font-size:22px;">設定</h2>
-            
-            <div class="setting-item">
-                <div class="setting-label">終了時の音 (警告音)</div>
-                <label class="switch">
-                    <input type="checkbox" id="setting-sound" checked>
-                    <span class="slider-toggle"></span>
-                </label>
-            </div>
-            
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">終了時刻に日付・年を表示</div>
-                    <div class="setting-sub">タイマーの終了時刻表示に使用されます</div>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="setting-date">
-                    <span class="slider-toggle"></span>
-                </label>
-            </div>
-
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">ストップウォッチの桁数</div>
-                    <div class="setting-sub">小数点以下の表示桁数: <span id="precision-val">3</span></div>
-                </div>
-                <!-- Precision range updated to max 3 as requested -->
-                <input type="range" id="setting-precision" min="0" max="3" value="3" step="1" oninput="updatePrecisionDisplay()">
-            </div>
-
-            <div style="margin-top:30px; text-align:right;">
-                <button class="btn" style="display:inline-flex; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); padding:10px 24px; border-radius:20px;" onclick="closeSettingsForce()">OK</button>
-            </div>
+  <div class="modal" id="builder-modal" aria-hidden="true">
+    <section class="builder-sheet" role="dialog" aria-modal="true" aria-labelledby="builder-title">
+      <div class="sheet-heading">
+        <div><h2 id="builder-title">タイマーを追加</h2><p>名前と時間を指定して、すぐに開始できます。</p></div>
+        <button class="icon-button close-button" type="button" data-close-modal="builder-modal" aria-label="閉じる"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <form id="timer-form">
+        <label class="form-label" for="timer-name">タイマー名 <span aria-hidden="true">（任意）</span></label>
+        <input class="name-input" id="timer-name" type="text" maxlength="40" placeholder="例：パスタをゆでる">
+        <span class="form-label">時間</span>
+        <div class="time-inputs">
+          <label class="time-field"><input id="timer-hours" type="number" min="0" max="99" value="0" inputmode="numeric" aria-label="時間"><span>時間</span></label>
+          <label class="time-field"><input id="timer-minutes" type="number" min="0" max="59" value="5" inputmode="numeric" aria-label="分"><span>分</span></label>
+          <label class="time-field"><input id="timer-seconds" type="number" min="0" max="59" value="0" inputmode="numeric" aria-label="秒"><span>秒</span></label>
         </div>
-    </div>
+        <p class="form-error" id="timer-form-error" aria-live="polite"></p>
+        <div class="sheet-actions"><button class="plain-button" type="button" data-close-modal="builder-modal">キャンセル</button><button class="action-button action-primary" type="submit"><i class="bi bi-play-fill"></i>開始する</button></div>
+      </form>
+    </section>
+  </div>
 
-    <script>
-        // === GLOBAL APP STATE ===
-        const appState = {
-            settings: { 
-                sound: true, 
-                showDate: false,
-                swPrecision: 3 // Default set to 3
-            },
-            timers: [] 
-        };
+  <div class="modal" id="settings-modal" aria-hidden="true">
+    <section class="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="sheet-heading">
+        <div><h2 id="settings-title">タイマー設定</h2><p>音と表示を、自分に合うように整えます。</p></div>
+        <button class="icon-button close-button" type="button" data-close-modal="settings-modal" aria-label="閉じる"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="settings-group">
+        <div class="setting-line"><div><p class="setting-title">終了時の音</p><p class="setting-help">タイマー終了をやさしく知らせます。</p></div><label class="switch"><input id="sound-enabled" type="checkbox" checked><span></span><span class="sr-only">終了時の音を有効にする</span></label></div>
+      </div>
+      <div class="settings-group">
+        <p class="setting-title">音色</p>
+        <div class="tone-options" role="radiogroup" aria-label="終了時の音色">
+          <label class="tone-option"><input type="radio" name="tone" value="gentle" checked><span>やさしい<br>チャイム</span></label>
+          <label class="tone-option"><input type="radio" name="tone" value="clear"><span>クリア<br>ベル</span></label>
+          <label class="tone-option"><input type="radio" name="tone" value="bright"><span>明るい<br>リマインダー</span></label>
+        </div>
+        <div class="volume-row"><input id="sound-volume" type="range" min="5" max="80" value="28" aria-label="終了時の音量"><output class="volume-value" id="sound-volume-value">28%</output></div>
+        <div class="preview-row"><button class="preview-button" id="preview-sound" type="button"><i class="bi bi-volume-up"></i> 試聴する</button></div>
+      </div>
+      <div class="settings-group">
+        <div class="setting-line"><div><p class="setting-title">終了時刻に日付を表示</p><p class="setting-help">日付をまたぐタイマーにも便利です。</p></div><label class="switch"><input id="show-date" type="checkbox"><span></span><span class="sr-only">終了時刻に日付を表示する</span></label></div>
+      </div>
+    </section>
+  </div>
 
-        // === AUDIO SYSTEM (ENHANCED ALARM) ===
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
+  <script>
+    (() => {
+      'use strict';
+      const STORAGE_KEY = 'tempo-timer-state-v1';
+      const $ = (selector, parent = document) => parent.querySelector(selector);
+      const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
+      const now = () => Date.now();
+      const perfNow = () => performance.now();
 
-        function initAudio() {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
+      const appState = {
+        settings: { sound: true, tone: 'gentle', volume: 28, showDate: false, theme: 'dark' },
+        timers: []
+      };
+      const stopwatch = { running: false, startAt: 0, elapsed: 0, requestId: 0, lastLapAt: 0, laps: [] };
+      let activeScreen = 'stopwatch';
+      let audioContext = null;
 
-        function playAlarm() {
-            if (!appState.settings.sound) return;
-            initAudio();
+      const elements = {
+        themeButton: $('#theme-button'),
+        swDisplay: $('#sw-display'), swMain: $('#sw-main'), swReset: $('#sw-reset'), swLap: $('#sw-lap'),
+        swState: $('#sw-state'), swStateText: $('#sw-state-text'), swAnnouncement: $('#sw-announcement'),
+        lapList: $('#lap-list'), clearLaps: $('#clear-laps'), statCount: $('#stat-count'), statFastest: $('#stat-fastest'), statSlowest: $('#stat-slowest'),
+        timerGrid: $('#timer-grid'), noTimers: $('#no-timers'),
+        builderModal: $('#builder-modal'), settingsModal: $('#settings-modal'),
+        timerForm: $('#timer-form'), timerName: $('#timer-name'), timerHours: $('#timer-hours'), timerMinutes: $('#timer-minutes'), timerSeconds: $('#timer-seconds'), timerError: $('#timer-form-error'),
+        soundEnabled: $('#sound-enabled'), soundVolume: $('#sound-volume'), soundVolumeValue: $('#sound-volume-value'), showDate: $('#show-date')
+      };
 
-            const t = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+      function persist() {
+        const serializableTimers = appState.timers.map(({ alarmId, ...timer }) => timer);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: appState.settings, timers: serializableTimers })); } catch (_) { /* ストレージが利用できない環境でも継続する */ }
+      }
 
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(880, t); 
-            osc.frequency.setValueAtTime(1760, t + 0.1); 
-            osc.frequency.setValueAtTime(880, t + 0.2); 
-            osc.frequency.setValueAtTime(1760, t + 0.3);
-
-            gain.gain.setValueAtTime(0.1, t);
-            gain.gain.setValueAtTime(0.1, t + 0.08);
-            gain.gain.setValueAtTime(0, t + 0.09);
-            
-            gain.gain.setValueAtTime(0.1, t + 0.1);
-            gain.gain.setValueAtTime(0.1, t + 0.18);
-            gain.gain.setValueAtTime(0, t + 0.19);
-
-            gain.gain.setValueAtTime(0.1, t + 0.2);
-            gain.gain.setValueAtTime(0.1, t + 0.28);
-            gain.gain.setValueAtTime(0, t + 0.29);
-            
-            osc.start(t);
-            osc.stop(t + 0.4);
-        }
-
-        // === NAVIGATION ===
-        function navTo(screenId, btnEl) {
-            document.querySelectorAll('.screen').forEach(el => {
-                if(el.id !== 'timer-input-screen') el.classList.remove('active');
-            });
-            document.getElementById(screenId + '-screen').classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            btnEl.classList.add('active');
-        }
-
-        // === STOPWATCH LOGIC (High Precision) ===
-        let swRunning = false;
-        let swStartTime = 0; // performance.now() timestamp
-        let swElapsed = 0;   // accumulated ms (float)
-        let swReqId = null;
-        let swLastLapTime = 0; // float ms
-
-        const swDisplay = document.getElementById('sw-display');
-        const swBtnMain = document.getElementById('sw-btn-main');
-        const swIconMain = document.getElementById('sw-icon-main');
-        const swBtnReset = document.getElementById('sw-btn-reset');
-        const swBtnLap = document.getElementById('sw-btn-lap');
-        const swLaps = document.getElementById('sw-laps');
-
-        // Use performance.now() for high precision if available
-        const getNow = () => performance.now();
-
-        /**
-         * ストップウォッチの時間を指定された精度と動的フォーマットで整形する
-         * @param {number} msFloat 経過ミリ秒 (float)
-         * @returns {string} HTMLを含む整形済み文字列
-         */
-        function formatSwTime(msFloat) {
-            const p = appState.settings.swPrecision;
-            
-            // Total seconds (including decimals)
-            const totalSec = msFloat / 1000;
-            
-            // Calculate H, M, S components
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            const s = Math.floor(totalSec % 60);
-            
-            // Get the fractional part for the requested precision
-            // Use toFixed to handle rounding and get the fixed-length decimal string
-            let fracStr = (totalSec % 1).toFixed(p).substring(2); // e.g. "0.123" -> "123"
-            
-            let timeStr = "";
-
-            // Dynamic Formatting Logic
-            if (h > 0) {
-                // H:MM:SS.frac
-                timeStr = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            } else if (m > 0) {
-                // MM:SS.frac
-                timeStr = `${m}:${String(s).padStart(2, '0')}`;
-            } else {
-                // S.frac (or SS.frac if consistency preferred, but example was 1.000)
-                timeStr = `${s}`; 
-            }
-
-            // Append fractional part if precision > 0
-            if (p > 0) {
-                 // The fractional part should have the requested precision.
-                 // We re-calculate to ensure high precision floats are correctly truncated/rounded.
-                 let decimalPart = Math.floor((msFloat / 1000) * (10 ** p)) % (10 ** p);
-                 fracStr = String(decimalPart).padStart(p, '0');
-                 // REMOVED special styling for fraction to make it inline/normal size
-                 return `${timeStr}.${fracStr}`;
-            } else {
-                return timeStr;
-            }
-        }
-        
-        /**
-         * ラップタイム差分表示用のシンプルなフォーマット (動的フォーマットを使用)
-         * @param {number} msFloat 経過ミリ秒 (float)
-         * @returns {string} 整形済み文字列
-         */
-        function formatTimeSimple(msFloat) {
-            const h = Math.floor(msFloat / 3600000);
-            const m = Math.floor((msFloat % 3600000) / 60000);
-            const s = Math.floor((msFloat % 60000) / 1000);
-            
-            let timeStr = "";
-            
-            if (h > 0) {
-                timeStr = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            } else if (m > 0) {
-                timeStr = `${m}:${String(s).padStart(2, '0')}`;
-            } else {
-                timeStr = `${s}`;
-            }
-
-            // Always add milliseconds for lap display for context, using 3 digits
-            const ms = Math.floor(msFloat % 1000);
-            return `${timeStr}.${String(ms).padStart(3, '0')}`;
-        }
-
-
-        function toggleStopwatch() {
-            if (!swRunning) {
-                swRunning = true;
-                // Subtract swElapsed to ensure smooth restart from paused time
-                swStartTime = getNow() - swElapsed; 
-                swReqId = requestAnimationFrame(updateSwLoop);
-                
-                swIconMain.className = 'bi bi-pause-fill';
-                swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary-container)';
-                swBtnMain.style.color = 'var(--md-sys-color-on-primary-container)';
-                swBtnReset.style.opacity = 1; swBtnReset.style.pointerEvents = 'auto';
-                swBtnLap.style.opacity = 1; swBtnLap.style.pointerEvents = 'auto';
-            } else {
-                swRunning = false;
-                cancelAnimationFrame(swReqId);
-                swIconMain.className = 'bi bi-play-fill';
-                swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary)';
-                swBtnMain.style.color = 'var(--md-sys-color-on-primary)';
-            }
-        }
-
-        function updateSwLoop() {
-            if (!swRunning) return;
-            // Calculate elapsed time from the stored start time
-            swElapsed = getNow() - swStartTime;
-            swDisplay.innerHTML = formatSwTime(swElapsed);
-            swReqId = requestAnimationFrame(updateSwLoop);
-        }
-
-        function resetStopwatch() {
-            swRunning = false;
-            cancelAnimationFrame(swReqId);
-            swElapsed = 0;
-            swLastLapTime = 0;
-            // Reset display to initial state with current precision
-            swDisplay.innerHTML = formatSwTime(0); 
-            swLaps.innerHTML = '';
-            
-            swIconMain.className = 'bi bi-play-fill';
-            swBtnMain.style.backgroundColor = 'var(--md-sys-color-primary)';
-            swBtnMain.style.color = 'var(--md-sys-color-on-primary)';
-            swBtnReset.style.opacity = 0; swBtnReset.style.pointerEvents = 'none';
-            swBtnLap.style.opacity = 0; swBtnLap.style.pointerEvents = 'none';
-        }
-
-        function lapStopwatch() {
-            const lapCount = swLaps.children.length + 1;
-            const currentLap = swElapsed;
-            const diff = currentLap - swLastLapTime;
-            swLastLapTime = currentLap;
-
-            const div = document.createElement('div');
-            div.className = 'lap-card';
-            div.id = `lap-${lapCount}`;
-            div.innerHTML = `
-                <div style="display:flex; align-items:center;">
-                    <span class="lap-num">#${lapCount}</span> 
-                    <span style="font-weight:500;">${swDisplay.innerText}</span>
-                    <span class="lap-diff">(+${formatTimeSimple(diff)})</span>
-                </div>
-                <button class="lap-del-btn" onclick="removeLap(this)"><i class="bi bi-x-lg"></i></button>
-            `;
-            swLaps.prepend(div);
-        }
-        
-        function removeLap(btn) {
-            btn.closest('.lap-card').remove();
-        }
-
-        // === TIMER INPUT LOGIC ===
-        let tmRawInput = "";
-        const tmInputScreen = document.getElementById('timer-input-screen');
-        const tmInputDisplay = document.getElementById('timer-input-display');
-        const tmBtnCreate = document.getElementById('tm-btn-create');
-        const hiddenInput = document.getElementById('hidden-input');
-
-        function showTimerInput() { tmInputScreen.classList.add('active'); resetInput(); }
-        function hideTimerInput() { tmInputScreen.classList.remove('active'); }
-        function resetInput() { tmRawInput = ""; hiddenInput.value = ""; updateInputDisplay(); }
-        function updateInputDisplay() {
-            let s = tmRawInput.padStart(6, '0');
-            let h = parseInt(s.substring(0,2));
-            let m = parseInt(s.substring(2,4));
-            let sec = parseInt(s.substring(4,6));
-            tmInputDisplay.textContent = `${h}h ${m}m ${sec}s`;
-            if (tmRawInput.length > 0) {
-                tmInputDisplay.classList.remove('placeholder');
-                tmInputDisplay.style.color = 'var(--md-sys-color-on-background)';
-                tmBtnCreate.style.opacity = 1; tmBtnCreate.style.pointerEvents = 'auto';
-            } else {
-                tmInputDisplay.classList.add('placeholder');
-                tmBtnCreate.style.opacity = 0.5; tmBtnCreate.style.pointerEvents = 'none';
-            }
-        }
-        function numpadInput(n) { if (tmRawInput.length < 6) { tmRawInput += n; updateInputDisplay(); } }
-        function numpadDelete() { tmRawInput = tmRawInput.slice(0, -1); updateInputDisplay(); }
-        function focusHiddenInput() { hiddenInput.focus(); }
-        hiddenInput.addEventListener('input', (e) => {
-            const nums = e.target.value.replace(/[^0-9]/g, '');
-            tmRawInput = nums.slice(0, 6); e.target.value = tmRawInput; updateInputDisplay();
-        });
-
-        function createTimerFromInput() {
-            let s = tmRawInput.padStart(6, '0');
-            let totalMs = (parseInt(s.substring(0,2)) * 3600 + parseInt(s.substring(2,4)) * 60 + parseInt(s.substring(4,6))) * 1000;
-            if (totalMs > 0) { addTimer(totalMs); hideTimerInput(); }
-        }
-
-        // === TIMER SYSTEM LOGIC ===
-        const timersContainer = document.getElementById('timers-container');
-        const noTimerMsg = document.getElementById('no-timer-msg');
-
-        function addTimer(durationMs) {
-            const id = Date.now() + Math.random();
-            const timer = {
-                id: id,
-                totalMs: durationMs,
-                remainingMs: durationMs,
-                endTime: Date.now() + durationMs,
-                running: true,
-                isOvertime: false,
-                alarmInterval: null
-            };
-            appState.timers.push(timer);
-            renderTimerCard(timer);
-            checkNoTimers();
-            // Only start the global loop if it's the first timer
-            if (appState.timers.length === 1) requestAnimationFrame(globalTimerLoop);
-        }
-
-        function checkNoTimers() {
-            noTimerMsg.style.display = appState.timers.length === 0 ? 'block' : 'none';
-        }
-
-        function renderTimerCard(timer) {
-            const div = document.createElement('div');
-            div.className = 'timer-card';
-            div.id = `timer-card-${timer.id}`;
-            // New Horizontal Layout with End Time and Reset Button inside Time Wrapper
-            div.innerHTML = `
-                <div class="card-circle-container">
-                    <svg>
-                        <circle cx="80" cy="80" r="72" class="circle-bg"></circle>
-                        <circle cx="80" cy="80" r="72" class="circle-progress" id="progress-${timer.id}"></circle>
-                    </svg>
-                    <div class="timer-card-time">
-                        <!-- End Time Display (New requirement: Above reset button) -->
-                        <div class="end-time-display" id="end-time-${timer.id}"></div>
-                        <div class="time-text" id="time-text-${timer.id}">0:00</div>
-                        <button class="btn-reset-internal" onclick="resetTimer(${timer.id})">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="timer-card-controls">
-                    <!-- Changed to X button -->
-                    <button class="control-btn-sub" onclick="handleTrashAction(${timer.id})">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                    <button class="control-btn-main" onclick="toggleTimerState(${timer.id})" id="play-btn-${timer.id}">
-                        <i class="bi bi-pause-fill" id="control-icon-${timer.id}"></i>
-                    </button>
-                    <button class="control-text-btn" onclick="addMinuteToTimer(${timer.id})">
-                        +1:00
-                    </button>
-                </div>
-            `;
-            timersContainer.prepend(div);
-            updateTimerUI(timer);
-        }
-
-        function stopTimerAlarm(timer) {
-            if (timer.alarmInterval) {
-                clearInterval(timer.alarmInterval);
-                timer.alarmInterval = null;
-            }
-        }
-
-        function handleTrashAction(id) {
-            deleteTimer(id);
-        }
-
-        function deleteTimer(id) {
-            const idx = appState.timers.findIndex(t => t.id === id);
-            if (idx > -1) {
-                stopTimerAlarm(appState.timers[idx]);
-                appState.timers.splice(idx, 1);
-                const el = document.getElementById(`timer-card-${id}`);
-                if (el) el.remove();
-            }
-            checkNoTimers();
-        }
-
-        function resetTimer(id) {
-            const timer = appState.timers.find(t => t.id === id);
-            if (!timer) return;
-
-            stopTimerAlarm(timer);
-            timer.isOvertime = false;
-            timer.running = false; 
-            timer.remainingMs = timer.totalMs;
-            timer.endTime = Date.now() + timer.totalMs; // Recalculate end time for display
-            
-            const icon = document.getElementById(`control-icon-${id}`);
-            if(icon) icon.className = 'bi bi-play-fill';
-            
-            updateTimerUI(timer);
-        }
-
-        function toggleTimerState(id) {
-            const timer = appState.timers.find(t => t.id === id);
-            if (!timer) return;
-
-            const icon = document.getElementById(`control-icon-${id}`);
-
+      function restore() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved) return;
+          Object.assign(appState.settings, saved.settings || {});
+          appState.settings.volume = Math.min(80, Math.max(5, Number(appState.settings.volume) || 28));
+          appState.timers = Array.isArray(saved.timers) ? saved.timers.map(timer => ({
+            id: String(timer.id), label: String(timer.label || 'タイマー'), totalMs: Math.max(1000, Number(timer.totalMs) || 60000),
+            remainingMs: Math.max(0, Number(timer.remainingMs) || 0), endAt: Number(timer.endAt) || 0,
+            running: Boolean(timer.running), completed: Boolean(timer.completed), finished: Boolean(timer.finished), alarmId: null
+          })) : [];
+          const timestamp = now();
+          appState.timers.forEach(timer => {
             if (timer.running) {
-                // Pause
-                timer.running = false;
-                // If overtime, stop the alarm
-                if (timer.isOvertime) stopTimerAlarm(timer);
-                icon.className = 'bi bi-play-fill';
-            } else {
-                // Resume/Start
-                timer.running = true;
-                timer.endTime = Date.now() + timer.remainingMs;
-                // If overtime, restart alarm (in case it was paused)
-                if (timer.isOvertime && !timer.alarmInterval) {
-                     playAlarm();
-                     timer.alarmInterval = setInterval(playAlarm, 1500);
-                }
-                icon.className = 'bi bi-pause-fill';
+              timer.remainingMs = Math.max(0, timer.endAt - timestamp);
+              if (timer.remainingMs === 0) { timer.running = false; timer.completed = true; }
             }
-            updateTimerUI(timer);
+          });
+        } catch (_) { /* 破損した保存値は初期状態として扱う */ }
+      }
+
+      function setTheme(theme) {
+        appState.settings.theme = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = appState.settings.theme;
+        document.querySelector('meta[name="theme-color"]').content = appState.settings.theme === 'light' ? '#f3f6fc' : '#10182b';
+        elements.themeButton.innerHTML = appState.settings.theme === 'dark' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+        elements.themeButton.setAttribute('aria-label', appState.settings.theme === 'dark' ? '明るい配色に切り替える' : '暗い配色に切り替える');
+      }
+
+      function formatStopwatch(milliseconds) {
+        const total = Math.max(0, Math.floor(milliseconds));
+        const hours = Math.floor(total / 3600000);
+        const minutes = Math.floor((total % 3600000) / 60000);
+        const seconds = Math.floor((total % 60000) / 1000);
+        const millis = total % 1000;
+        const prefix = hours ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}` : String(minutes).padStart(2, '0');
+        return `${prefix}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+      }
+
+      function formatTimer(milliseconds) {
+        const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}` : `${minutes}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      function updateStopwatchUI() {
+        elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
+        elements.swMain.innerHTML = stopwatch.running ? '<i class="bi bi-pause-fill"></i><span>一時停止</span>' : '<i class="bi bi-play-fill"></i><span>開始</span>';
+        elements.swReset.disabled = stopwatch.running || stopwatch.elapsed === 0;
+        elements.swLap.disabled = !stopwatch.running;
+        elements.clearLaps.disabled = stopwatch.laps.length === 0;
+        elements.swState.classList.toggle('running', stopwatch.running);
+        elements.swStateText.textContent = stopwatch.running ? '計測中' : stopwatch.elapsed > 0 ? '一時停止中' : '準備完了';
+      }
+
+      function stopwatchLoop() {
+        if (!stopwatch.running) return;
+        stopwatch.elapsed = perfNow() - stopwatch.startAt;
+        elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
+        stopwatch.requestId = requestAnimationFrame(stopwatchLoop);
+      }
+
+      function toggleStopwatch() {
+        if (stopwatch.running) {
+          stopwatch.elapsed = perfNow() - stopwatch.startAt;
+          stopwatch.running = false;
+          cancelAnimationFrame(stopwatch.requestId);
+          elements.swAnnouncement.textContent = `ストップウォッチを${formatStopwatch(stopwatch.elapsed)}で一時停止しました`;
+        } else {
+          stopwatch.running = true;
+          stopwatch.startAt = perfNow() - stopwatch.elapsed;
+          stopwatch.requestId = requestAnimationFrame(stopwatchLoop);
+          elements.swAnnouncement.textContent = 'ストップウォッチを開始しました';
         }
+        updateStopwatchUI();
+      }
 
-        function addMinuteToTimer(id) {
-            const timer = appState.timers.find(t => t.id === id);
-            if (!timer) return;
-            
-            const oneMinute = 60000;
-            const icon = document.getElementById(`control-icon-${id}`);
+      function resetStopwatch() {
+        if (stopwatch.running) return;
+        stopwatch.elapsed = 0;
+        stopwatch.lastLapAt = 0;
+        stopwatch.laps = [];
+        renderLaps();
+        updateStopwatchUI();
+        elements.swAnnouncement.textContent = 'ストップウォッチとラップ履歴をリセットしました';
+      }
 
-            if (timer.isOvertime) {
-                // If in overtime, reset overtime state and add 1 minute to remaining time
-                stopTimerAlarm(timer);
-                timer.isOvertime = false;
-                // The remainingMs is negative, adding oneMinute brings it closer to 0 or positive.
-                timer.remainingMs += oneMinute;
-                // Since the original totalMs is for positive time, we only adjust end time
-                timer.endTime = Date.now() + timer.remainingMs; 
-                timer.running = true;
-                icon.className = 'bi bi-pause-fill';
-            } else {
-                // If counting down, add 1 minute to total and remaining time
-                timer.totalMs += oneMinute;
-                timer.remainingMs += oneMinute;
-                if (timer.running) timer.endTime += oneMinute;
-            }
-            // Ensure timer runs if it was paused and now has time
-            if (!timer.running && timer.remainingMs > 0) {
-                 timer.running = true;
-                 timer.endTime = Date.now() + timer.remainingMs;
-                 icon.className = 'bi bi-pause-fill';
-            }
-            updateTimerUI(timer);
+      function addLap() {
+        if (!stopwatch.running) return;
+        stopwatch.elapsed = perfNow() - stopwatch.startAt;
+        const lap = { total: stopwatch.elapsed, split: stopwatch.elapsed - stopwatch.lastLapAt };
+        stopwatch.lastLapAt = stopwatch.elapsed;
+        stopwatch.laps.push(lap);
+        renderLaps();
+        elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
+        elements.swAnnouncement.textContent = `ラップ ${stopwatch.laps.length} を ${formatStopwatch(lap.total)} で記録しました`;
+      }
+
+      function renderLaps() {
+        const laps = stopwatch.laps;
+        if (!laps.length) {
+          elements.lapList.innerHTML = '<div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>';
+          elements.statCount.textContent = '0'; elements.statFastest.textContent = '—'; elements.statSlowest.textContent = '—';
+          updateStopwatchUI();
+          return;
         }
+        const splits = laps.map(lap => lap.split);
+        const fastest = Math.min(...splits), slowest = Math.max(...splits);
+        elements.lapList.innerHTML = laps.map((lap, index) => {
+          const badge = laps.length > 1 && lap.split === fastest ? '<span class="lap-badge fastest">最速</span>' : laps.length > 1 && lap.split === slowest ? '<span class="lap-badge slowest">最遅</span>' : '';
+          return `<div class="lap-item"><span class="lap-index">#${index + 1}</span><div class="lap-main"><div class="lap-total">${formatStopwatch(lap.total)}</div><div class="lap-split">+${formatStopwatch(lap.split)}</div></div>${badge}</div>`;
+        }).reverse().join('');
+        elements.statCount.textContent = String(laps.length);
+        elements.statFastest.textContent = formatStopwatch(fastest);
+        elements.statSlowest.textContent = formatStopwatch(slowest);
+        updateStopwatchUI();
+      }
 
-        /**
-         * タイマーの残り時間を動的フォーマットで整形する
-         * @param {number} ms 残りミリ秒
-         * @param {boolean} isOvertime 時間切れかどうか
-         * @returns {string} 整形済み文字列
-         */
-        function formatTimerDisplay(ms, isOvertime) {
-            if (isOvertime) {
-                // Overtime: Show only absolute seconds with negative sign
-                const sec = Math.ceil(Math.abs(ms) / 1000);
-                return `-${sec}`;
-            }
+      function initAudio() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        if (!audioContext) audioContext = new AudioCtx();
+        if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+        return audioContext;
+      }
 
-            // Normal: Dynamic formatting
-            const totalSec = Math.ceil(ms / 1000);
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            const s = totalSec % 60;
+      function scheduleNote(ctx, frequency, start, duration, level, type = 'sine') {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, level), start + 0.028);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain).connect(ctx.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.02);
+      }
 
-            const pad = (num) => String(num).padStart(2, '0');
-
-            if (h > 0) {
-                // H:MM:SS
-                return `${h}:${pad(m)}:${pad(s)}`;
-            } else if (m > 0) {
-                // M:SS
-                return `${m}:${pad(s)}`;
-            } else {
-                // S
-                return `${s}`;
-            }
+      function playAlarm() {
+        if (!appState.settings.sound) return;
+        const ctx = initAudio();
+        if (!ctx) return;
+        const volume = (appState.settings.volume / 100) * 0.45;
+        const start = ctx.currentTime + 0.015;
+        const tone = appState.settings.tone;
+        if (tone === 'bright') {
+          scheduleNote(ctx, 660, start, .18, volume, 'triangle');
+          scheduleNote(ctx, 880, start + .23, .26, volume * .9, 'triangle');
+        } else if (tone === 'clear') {
+          scheduleNote(ctx, 523.25, start, .24, volume * .9, 'sine');
+          scheduleNote(ctx, 783.99, start + .28, .42, volume, 'sine');
+          scheduleNote(ctx, 1567.98, start + .28, .25, volume * .17, 'sine');
+        } else {
+          scheduleNote(ctx, 392, start, .25, volume * .8, 'sine');
+          scheduleNote(ctx, 523.25, start + .30, .38, volume * .7, 'sine');
+          scheduleNote(ctx, 1046.5, start + .30, .25, volume * .10, 'sine');
         }
-        
-        /**
-         * 終了時刻をフォーマットする
-         * @param {number} timestamp 終了時刻のタイムスタンプ
-         * @returns {string} 整形済み文字列
-         */
-        function formatEndTime(timestamp) {
-            const date = new Date(timestamp);
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            
-            let timeStr = `${hours}:${minutes}`;
+      }
 
-            if (appState.settings.showDate) {
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                timeStr = `${month}/${day} ${timeStr}`;
-            }
-            
-            return `終了時刻 ${timeStr}`;
+      function stopAlarm(timer) {
+        if (timer && timer.alarmId) { clearInterval(timer.alarmId); timer.alarmId = null; }
+      }
+
+      function createTimer(durationMs, label) {
+        const id = `${now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const rounded = Math.max(1000, Math.floor(durationMs / 1000) * 1000);
+        const timer = { id, label: label || `タイマー ${appState.timers.length + 1}`, totalMs: rounded, remainingMs: rounded, endAt: now() + rounded, running: true, completed: false, finished: false, alarmId: null };
+        appState.timers.unshift(timer);
+        initAudio();
+        persist(); renderTimers();
+      }
+
+      function completeTimer(timer) {
+        if (timer.completed || timer.finished) return;
+        timer.remainingMs = 0;
+        timer.running = false;
+        timer.completed = true;
+        playAlarm();
+        if (appState.settings.sound) timer.alarmId = setInterval(playAlarm, 4500);
+        persist();
+      }
+
+      function tickTimers() {
+        const timestamp = now();
+        let changed = false;
+        appState.timers.forEach(timer => {
+          if (timer.running) {
+            timer.remainingMs = Math.max(0, timer.endAt - timestamp);
+            if (timer.remainingMs === 0) { completeTimer(timer); changed = true; }
+          }
+          updateTimerCard(timer);
+        });
+        if (changed) renderTimers();
+      }
+
+      function timerStatus(timer) {
+        if (timer.completed) return { text: '終了しました', className: 'done' };
+        if (timer.finished) return { text: '通知を停止', className: '' };
+        if (timer.running) return { text: '進行中', className: 'running' };
+        return { text: '一時停止', className: '' };
+      }
+
+      function formatEndTime(timer) {
+        if (timer.completed || timer.finished) return timer.finished ? 'タイマーを停止しました' : 'アラームを停止できます';
+        const date = new Date(timer.running ? timer.endAt : now() + timer.remainingMs);
+        const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        if (appState.settings.showDate) return `${date.getMonth() + 1}/${date.getDate()} ${time} に終了`;
+        return `${time} に終了予定`;
+      }
+
+      function escapeHTML(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
+
+      function timerCardMarkup(timer) {
+        const status = timerStatus(timer);
+        const progress = timer.totalMs ? Math.max(0, Math.min(100, (timer.remainingMs / timer.totalMs) * 100)) : 0;
+        const mainLabel = timer.completed ? '通知を停止' : timer.finished ? 'もう一度' : timer.running ? '一時停止' : '再開';
+        const mainIcon = timer.completed ? 'bi-volume-mute-fill' : timer.finished ? 'bi-arrow-clockwise' : timer.running ? 'bi-pause-fill' : 'bi-play-fill';
+        return `<article class="timer-card ${timer.completed ? 'done' : ''} ${timer.finished ? 'finished' : ''}" id="timer-${timer.id}">
+          <div class="timer-topline"><h2 class="timer-name">${escapeHTML(timer.label)}</h2><span class="timer-status ${status.className}">${status.text}</span></div>
+          <div class="timer-middle"><div class="timer-ring" style="--progress:${progress}%"><output class="timer-value" id="timer-value-${timer.id}">${formatTimer(timer.remainingMs)}</output></div><div class="timer-context"><p class="end-label">${timer.completed ? 'タイマー完了' : '終了時刻'}</p><p class="end-value" id="timer-end-${timer.id}">${formatEndTime(timer)}</p></div></div>
+          <div class="timer-actions"><button class="action-button action-primary" type="button" data-timer-action="toggle" data-timer-id="${timer.id}"><i class="bi ${mainIcon}"></i>${mainLabel}</button><button class="action-button action-secondary" type="button" data-timer-action="plus" data-timer-id="${timer.id}" aria-label="1分追加" title="1分追加"><i class="bi bi-plus-lg"></i></button><button class="action-button action-secondary delete-button" type="button" data-timer-action="delete" data-timer-id="${timer.id}" aria-label="タイマーを削除" title="削除"><i class="bi bi-trash3"></i></button></div>
+        </article>`;
+      }
+
+      function renderTimers() {
+        elements.timerGrid.innerHTML = appState.timers.map(timerCardMarkup).join('');
+        elements.noTimers.hidden = appState.timers.length > 0;
+      }
+
+      function updateTimerCard(timer) {
+        const card = $(`#timer-${CSS.escape(timer.id)}`);
+        if (!card) return;
+        const status = timerStatus(timer);
+        const output = $(`#timer-value-${CSS.escape(timer.id)}`);
+        const end = $(`#timer-end-${CSS.escape(timer.id)}`);
+        const statusEl = $('.timer-status', card);
+        if (output) output.textContent = formatTimer(timer.remainingMs);
+        if (end) end.textContent = formatEndTime(timer);
+        if (statusEl) { statusEl.textContent = status.text; statusEl.className = `timer-status ${status.className}`; }
+        card.style.setProperty('--progress', `${Math.max(0, Math.min(100, (timer.remainingMs / timer.totalMs) * 100))}%`);
+      }
+
+      function toggleTimer(id) {
+        const timer = appState.timers.find(item => item.id === id);
+        if (!timer) return;
+        initAudio();
+        if (timer.completed) {
+          stopAlarm(timer); timer.completed = false; timer.finished = true; timer.running = false;
+        } else if (timer.finished) {
+          timer.finished = false; timer.completed = false; timer.remainingMs = timer.totalMs; timer.endAt = now() + timer.totalMs; timer.running = true;
+        } else if (timer.running) {
+          timer.remainingMs = Math.max(0, timer.endAt - now()); timer.running = false;
+        } else if (timer.remainingMs > 0) {
+          timer.endAt = now() + timer.remainingMs; timer.running = true;
         }
+        persist(); renderTimers();
+      }
 
-        function updateTimerUI(timer) {
-            const elProgress = document.getElementById(`progress-${timer.id}`);
-            const elText = document.getElementById(`time-text-${timer.id}`);
-            const elCard = document.getElementById(`timer-card-${timer.id}`);
-            const elEndTime = document.getElementById(`end-time-${timer.id}`);
-
-            if (!elProgress) return;
-
-            // 1. Update End Time Display (New requirement)
-            elEndTime.textContent = formatEndTime(timer.endTime);
-
-            // 2. Update Time Text
-            elText.textContent = formatTimerDisplay(timer.remainingMs, timer.isOvertime);
-
-            // 3. Handle Overtime Styles and Progress
-            if (timer.isOvertime) {
-                elCard.classList.add('overtime');
-                elProgress.style.strokeDashoffset = 0; 
-                elProgress.style.stroke = 'var(--md-sys-color-error)';
-            } else {
-                elCard.classList.remove('overtime');
-                elProgress.style.stroke = 'var(--md-sys-color-primary)';
-                // Progress (2*PI*72 = 452)
-                const pct = Math.max(0, timer.remainingMs / timer.totalMs);
-                elProgress.style.strokeDashoffset = 452 - (452 * pct);
-            }
+      function addMinute(id) {
+        const timer = appState.timers.find(item => item.id === id);
+        if (!timer) return;
+        initAudio(); stopAlarm(timer);
+        if (timer.completed || timer.finished) {
+          timer.completed = false; timer.finished = false; timer.remainingMs = 60000; timer.totalMs = Math.max(timer.totalMs, 60000); timer.endAt = now() + 60000; timer.running = true;
+        } else {
+          timer.totalMs += 60000; timer.remainingMs += 60000;
+          if (timer.running) timer.endAt += 60000;
         }
+        persist(); renderTimers();
+      }
 
-        function globalTimerLoop() {
-            const now = Date.now();
-            let hasTimers = false;
+      function deleteTimer(id) {
+        const index = appState.timers.findIndex(item => item.id === id);
+        if (index < 0) return;
+        stopAlarm(appState.timers[index]);
+        appState.timers.splice(index, 1);
+        persist(); renderTimers();
+      }
 
-            appState.timers.forEach(timer => {
-                hasTimers = true;
-                if (timer.running) {
-                    const left = timer.endTime - now;
-                    
-                    if (left <= 0 && !timer.isOvertime) {
-                        // Just crossed 0
-                        timer.isOvertime = true;
-                        timer.remainingMs = left;
-                        playAlarm(); 
-                        timer.alarmInterval = setInterval(playAlarm, 1500);
-                    } else if (timer.isOvertime) {
-                         // Continue negative counting
-                         timer.remainingMs = left;
-                    } else {
-                        // Normal positive counting
-                        timer.remainingMs = left;
-                    }
-                }
-                updateTimerUI(timer);
-            });
+      function showScreen(screen) {
+        activeScreen = screen;
+        $('#stopwatch-screen').classList.toggle('active', screen === 'stopwatch');
+        $('#timer-screen').classList.toggle('active', screen === 'timer');
+        $$('.nav-item').forEach(button => { const isActive = button.dataset.screen === screen; button.classList.toggle('active', isActive); button.toggleAttribute('aria-current', isActive); });
+      }
 
-            if (hasTimers) {
-                requestAnimationFrame(globalTimerLoop);
-            }
-        }
+      function openModal(id) {
+        const modal = $(`#${id}`);
+        modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+        if (id === 'builder-modal') { elements.timerError.textContent = ''; setTimeout(() => elements.timerName.focus(), 100); }
+        if (id === 'settings-modal') { syncSettingsControls(); setTimeout(() => elements.soundEnabled.focus(), 100); }
+      }
+      function closeModal(id) { const modal = $(`#${id}`); modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); }
+      function isModalOpen() { return $$('.modal.open').length > 0; }
 
-        // === SETTINGS ===
-        const modal = document.getElementById('settings-modal');
-        const chkSound = document.getElementById('setting-sound');
-        const chkDate = document.getElementById('setting-date');
-        const rngPrecision = document.getElementById('setting-precision');
-        const txtPrecision = document.getElementById('precision-val');
+      function syncSettingsControls() {
+        elements.soundEnabled.checked = appState.settings.sound;
+        elements.soundVolume.value = appState.settings.volume;
+        elements.soundVolumeValue.textContent = `${appState.settings.volume}%`;
+        elements.showDate.checked = appState.settings.showDate;
+        const tone = $(`input[name="tone"][value="${appState.settings.tone}"]`);
+        if (tone) tone.checked = true;
+      }
 
-        function openSettings() {
-            modal.classList.add('open');
-            // Load current settings
-            chkSound.checked = appState.settings.sound;
-            chkDate.checked = appState.settings.showDate;
-            rngPrecision.value = appState.settings.swPrecision;
-            txtPrecision.innerText = appState.settings.swPrecision;
-        }
-        function updatePrecisionDisplay() {
-            // Update the display text as the user moves the slider
-            txtPrecision.innerText = rngPrecision.value;
-        }
-        function closeSettings(e) {
-            if (e.target === modal) { saveSettings(); modal.classList.remove('open'); }
-        }
-        function closeSettingsForce() {
-            saveSettings(); modal.classList.remove('open');
-        }
-        function saveSettings() {
-            appState.settings.sound = chkSound.checked;
-            appState.settings.showDate = chkDate.checked;
-            appState.settings.swPrecision = parseInt(rngPrecision.value);
-            
-            // Refresh StopWatch display immediately
-            if (!swRunning) swDisplay.innerHTML = formatSwTime(swElapsed);
-            
-            // Refresh all Timer UIs to update End Time format
-            appState.timers.forEach(t => updateTimerUI(t));
-        }
-        
-        // Initial setup for stopwatch display
-        window.onload = () => {
-             // Set initial display for stopwatch based on default settings
-             swDisplay.innerHTML = formatSwTime(0);
-             // Ensure initial precision display is correct
-             rngPrecision.value = appState.settings.swPrecision;
-             txtPrecision.innerText = appState.settings.swPrecision;
-        }
+      function saveSettings() { persist(); appState.timers.forEach(updateTimerCard); }
 
-    </script>
+      elements.swMain.addEventListener('click', toggleStopwatch);
+      elements.swReset.addEventListener('click', resetStopwatch);
+      elements.swLap.addEventListener('click', addLap);
+      elements.clearLaps.addEventListener('click', () => { stopwatch.laps = []; stopwatch.lastLapAt = 0; renderLaps(); elements.swAnnouncement.textContent = 'ラップ履歴をすべて消去しました'; });
+      elements.themeButton.addEventListener('click', () => { setTheme(appState.settings.theme === 'dark' ? 'light' : 'dark'); persist(); });
+
+      document.addEventListener('keydown', event => {
+        if (event.code !== 'Space' || event.repeat || activeScreen !== 'stopwatch' || !stopwatch.running || isModalOpen()) return;
+        const target = event.target;
+        if (target.closest('input, textarea, select, a, [contenteditable="true"]')) return;
+        event.preventDefault();
+        addLap();
+      });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal.open').forEach(modal => closeModal(modal.id)); });
+
+      $$('.nav-item').forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+      $('#settings-button').addEventListener('click', () => openModal('settings-modal'));
+      $('#add-timer-button').addEventListener('click', () => openModal('builder-modal'));
+      $('#empty-add-timer').addEventListener('click', () => openModal('builder-modal'));
+      $$('.quick-button').forEach(button => button.addEventListener('click', () => createTimer(Number(button.dataset.quickMinutes) * 60000, `${button.dataset.quickMinutes}分タイマー`)));
+
+      document.addEventListener('click', event => {
+        const close = event.target.closest('[data-close-modal]');
+        if (close) closeModal(close.dataset.closeModal);
+        if (event.target.classList.contains('modal')) closeModal(event.target.id);
+        const action = event.target.closest('[data-timer-action]');
+        if (!action) return;
+        const { timerAction, timerId } = action.dataset;
+        if (timerAction === 'toggle') toggleTimer(timerId);
+        if (timerAction === 'plus') addMinute(timerId);
+        if (timerAction === 'delete') deleteTimer(timerId);
+      });
+
+      elements.timerForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const hours = Math.max(0, Math.min(99, Number(elements.timerHours.value) || 0));
+        const minutes = Math.max(0, Math.min(59, Number(elements.timerMinutes.value) || 0));
+        const seconds = Math.max(0, Math.min(59, Number(elements.timerSeconds.value) || 0));
+        const duration = ((hours * 3600) + (minutes * 60) + seconds) * 1000;
+        if (!duration) { elements.timerError.textContent = '1秒以上の時間を入力してください。'; return; }
+        createTimer(duration, elements.timerName.value.trim());
+        elements.timerForm.reset(); elements.timerHours.value = '0'; elements.timerMinutes.value = '5'; elements.timerSeconds.value = '0';
+        closeModal('builder-modal'); showScreen('timer');
+      });
+
+      elements.soundEnabled.addEventListener('change', event => { appState.settings.sound = event.target.checked; saveSettings(); });
+      elements.showDate.addEventListener('change', event => { appState.settings.showDate = event.target.checked; saveSettings(); });
+      elements.soundVolume.addEventListener('input', event => { appState.settings.volume = Number(event.target.value); elements.soundVolumeValue.textContent = `${appState.settings.volume}%`; saveSettings(); });
+      $$('input[name="tone"]').forEach(input => input.addEventListener('change', event => { appState.settings.tone = event.target.value; saveSettings(); }));
+      $('#preview-sound').addEventListener('click', () => { initAudio(); playAlarm(); });
+
+      restore();
+      setTheme(appState.settings.theme);
+      syncSettingsControls();
+      renderLaps(); updateStopwatchUI(); renderTimers();
+      setInterval(tickTimers, 200);
+    })();
+  </script>
 </body>
 </html>
