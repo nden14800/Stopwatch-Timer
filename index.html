@@ -109,9 +109,12 @@
     .panel { min-height: 440px; padding: 22px; border-radius: 28px; }
     .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
     .panel-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; }
+    .panel-actions { display: inline-flex; align-items: center; gap: 2px; }
     .text-button { padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--primary); cursor: pointer; font-size: 12px; font-weight: 800; }
     .text-button:hover { background: color-mix(in srgb, var(--primary) 11%, transparent); }
-    .lap-list { display: flex; max-height: 354px; flex-direction: column; gap: 8px; overflow: auto; padding-right: 2px; touch-action: manipulation; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+    .text-button:disabled { opacity: .4; }
+    .lap-list { display: flex; max-height: 354px; flex-direction: column; gap: 8px; overflow: auto; padding-right: 2px; touch-action: manipulation; scrollbar-width: thin; scrollbar-color: var(--line) transparent; content-visibility: auto; contain: content; }
+    .lap-window-note { min-height: 18px; margin: 10px 0 0; color: var(--subtle); font-size: 10px; font-weight: 700; text-align: right; }
     .empty-state { display: grid; min-height: 255px; place-items: center; padding: 25px; border: 1px dashed var(--line); border-radius: 18px; color: var(--subtle); text-align: center; }
     .empty-state i { display: block; margin-bottom: 8px; color: var(--accent); font-size: 24px; }
     .empty-state p { margin: 0; font-size: 13px; }
@@ -155,10 +158,15 @@
     .timer-status.running::before { background: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent); }
     .timer-status.done::before { background: var(--warning); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 14%, transparent); }
     .timer-middle { position: relative; z-index: 1; display: flex; align-items: center; gap: 20px; }
-    .timer-ring { position: relative; isolation: isolate; display: grid; width: 142px; height: 142px; flex: 0 0 142px; place-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line)); border-radius: 50%; background: conic-gradient(from -90deg, var(--primary) var(--progress), color-mix(in srgb, var(--surface-raised) 92%, transparent) 0); box-shadow: inset 0 0 18px color-mix(in srgb, var(--primary) 20%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
-    .timer-card.done .timer-ring { border-color: color-mix(in srgb, var(--warning) 38%, var(--line)); background: conic-gradient(from -90deg, var(--warning) var(--progress), color-mix(in srgb, var(--surface-raised) 92%, transparent) 0); box-shadow: inset 0 0 18px color-mix(in srgb, var(--warning) 20%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
-    .timer-ring::before { position: absolute; z-index: -1; inset: 11px; border: 1px solid var(--line); border-radius: 50%; background: radial-gradient(circle at 32% 24%, color-mix(in srgb, white 12%, transparent), transparent 35%), var(--surface-solid); box-shadow: inset 0 1px rgba(255,255,255,.10); content: ""; }
-    .timer-value { position: relative; z-index: 1; font: 500 25px/1 var(--mono); letter-spacing: -.07em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .timer-ring { position: relative; isolation: isolate; display: grid; width: 142px; height: 142px; flex: 0 0 142px; place-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line)); border-radius: 50%; background: radial-gradient(circle at 32% 24%, color-mix(in srgb, white 10%, transparent), transparent 35%), var(--surface-solid); box-shadow: inset 0 0 18px color-mix(in srgb, var(--primary) 14%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
+    .timer-card.done .timer-ring { border-color: color-mix(in srgb, var(--warning) 38%, var(--line)); box-shadow: inset 0 0 18px color-mix(in srgb, var(--warning) 20%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
+    .timer-progress-svg { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+    .timer-track, .timer-progress { fill: none; stroke-width: 9; }
+    .timer-track { stroke: color-mix(in srgb, var(--surface-raised) 90%, transparent); }
+    .timer-progress { stroke: var(--primary); stroke-linecap: round; transition: stroke-dasharray .18s linear, stroke .18s ease; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--primary) 55%, transparent)); }
+    .timer-card.done .timer-progress { stroke: var(--warning); filter: drop-shadow(0 0 4px color-mix(in srgb, var(--warning) 55%, transparent)); }
+    .timer-ring::before { position: absolute; z-index: 1; inset: 14px; border: 1px solid var(--line); border-radius: 50%; background: radial-gradient(circle at 32% 24%, color-mix(in srgb, white 12%, transparent), transparent 35%), var(--surface-solid); box-shadow: inset 0 1px rgba(255,255,255,.10); content: ""; }
+    .timer-value { position: relative; z-index: 2; font: 500 25px/1 var(--mono); letter-spacing: -.07em; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .timer-context { position: relative; z-index: 1; min-width: 0; }
     .end-label { margin: 0 0 5px; color: var(--subtle); font-size: 11px; font-weight: 800; }
     .end-value { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
@@ -273,18 +281,19 @@
                 <button class="action-button action-primary" id="sw-main" type="button"><i class="bi bi-play-fill"></i><span>開始</span></button>
                 <button class="action-button action-secondary" id="sw-lap" type="button" aria-label="ラップを記録" title="ラップを記録" disabled><i class="bi bi-flag-fill"></i></button>
               </div>
-              <p class="shortcut-hint"><kbd>Space</kbd> を押すとラップ、長押しで連続ラップを記録します</p>
+              <p class="shortcut-hint"><kbd>Space</kbd> を押すとラップ、押し続けると連続ラップを記録します</p>
             </div>
             <p class="sr-only" id="sw-announcement" aria-live="polite"></p>
           </section>
           <aside class="panel" aria-labelledby="lap-title">
             <div class="panel-heading">
               <h2 id="lap-title">ラップ履歴</h2>
-              <button class="text-button" id="clear-laps" type="button" disabled>すべて消去</button>
+              <div class="panel-actions"><button class="text-button" id="export-laps" type="button" disabled><i class="bi bi-download"></i> CSV</button><button class="text-button" id="clear-laps" type="button" disabled>すべて消去</button></div>
             </div>
             <div class="lap-list" id="lap-list">
               <div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>
             </div>
+            <p class="lap-window-note" id="lap-window-note">最新40件を表示・履歴は100件まで保持</p>
             <div class="lap-stats" aria-label="ラップの集計">
               <div class="stat"><span class="stat-label">ラップ数</span><span class="stat-value" id="stat-count">0</span></div>
               <div class="stat"><span class="stat-label">最速</span><span class="stat-value" id="stat-fastest">—</span></div>
@@ -390,21 +399,19 @@
         settings: { sound: true, tone: 'gentle', volume: 28, showDate: false, theme: 'dark' },
         timers: []
       };
-      const stopwatch = { running: false, startAt: 0, elapsed: 0, requestId: 0, lastLapAt: 0, laps: [] };
+      const LAP_RENDER_LIMIT = 40;
+      const LAP_STORAGE_LIMIT = 100;
+      const stopwatch = { running: false, startAt: 0, elapsed: 0, requestId: 0, lastLapAt: 0, laps: [], lapCount: 0, fastestSplit: Infinity, slowestSplit: 0, lapRenderRequest: null, lapRenderQueued: false };
       let activeScreen = 'stopwatch';
       let audioContext = null;
       let audioUnlocked = false;
       let spaceHeld = false;
-      let spaceHoldDelayId = null;
-      let spaceRepeatId = null;
-      const SPACE_HOLD_DELAY = 0;
-      const SPACE_LAP_INTERVAL = 0;
 
       const elements = {
         themeButton: $('#theme-button'),
         swDisplay: $('#sw-display'), swMain: $('#sw-main'), swReset: $('#sw-reset'), swLap: $('#sw-lap'),
         swState: $('#sw-state'), swStateText: $('#sw-state-text'), swAnnouncement: $('#sw-announcement'),
-        lapList: $('#lap-list'), clearLaps: $('#clear-laps'), statCount: $('#stat-count'), statFastest: $('#stat-fastest'), statSlowest: $('#stat-slowest'),
+        lapList: $('#lap-list'), clearLaps: $('#clear-laps'), exportLaps: $('#export-laps'), lapWindowNote: $('#lap-window-note'), statCount: $('#stat-count'), statFastest: $('#stat-fastest'), statSlowest: $('#stat-slowest'),
         timerGrid: $('#timer-grid'), noTimers: $('#no-timers'), timerMetrics: $('#timer-metrics'), toggleAllButton: $('#toggle-all-button'), audioUnlockButton: $('#audio-unlock-button'), audioStatus: $('#audio-status'),
         builderModal: $('#builder-modal'), settingsModal: $('#settings-modal'),
         timerForm: $('#timer-form'), timerName: $('#timer-name'), timerHours: $('#timer-hours'), timerMinutes: $('#timer-minutes'), timerSeconds: $('#timer-seconds'), timerError: $('#timer-form-error'),
@@ -495,45 +502,82 @@
         updateStopwatchUI();
       }
 
+      function resetLapHistory() {
+        stopwatch.laps = [];
+        stopwatch.lapCount = 0;
+        stopwatch.fastestSplit = Infinity;
+        stopwatch.slowestSplit = 0;
+        stopwatch.lastLapAt = 0;
+        if (stopwatch.lapRenderRequest !== null) cancelAnimationFrame(stopwatch.lapRenderRequest);
+        stopwatch.lapRenderRequest = null;
+        stopwatch.lapRenderQueued = false;
+        renderLaps();
+      }
+
       function resetStopwatch() {
         if (stopwatch.running) return;
         stopwatch.elapsed = 0;
-        stopwatch.lastLapAt = 0;
-        stopwatch.laps = [];
-        renderLaps();
+        resetLapHistory();
         updateStopwatchUI();
         elements.swAnnouncement.textContent = 'ストップウォッチとラップ履歴をリセットしました';
+      }
+
+      function queueLapRender() {
+        if (stopwatch.lapRenderQueued) return;
+        stopwatch.lapRenderQueued = true;
+        stopwatch.lapRenderRequest = requestAnimationFrame(() => {
+          stopwatch.lapRenderQueued = false;
+          stopwatch.lapRenderRequest = null;
+          renderLaps();
+        });
       }
 
       function addLap() {
         if (!stopwatch.running) return;
         stopwatch.elapsed = perfNow() - stopwatch.startAt;
-        const lap = { total: stopwatch.elapsed, split: stopwatch.elapsed - stopwatch.lastLapAt };
+        const lap = { number: ++stopwatch.lapCount, total: stopwatch.elapsed, split: stopwatch.elapsed - stopwatch.lastLapAt };
         stopwatch.lastLapAt = stopwatch.elapsed;
+        stopwatch.fastestSplit = Math.min(stopwatch.fastestSplit, lap.split);
+        stopwatch.slowestSplit = Math.max(stopwatch.slowestSplit, lap.split);
         stopwatch.laps.push(lap);
-        renderLaps();
+        if (stopwatch.laps.length > LAP_STORAGE_LIMIT) stopwatch.laps.shift();
+        queueLapRender();
         elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
-        elements.swAnnouncement.textContent = `ラップ ${stopwatch.laps.length} を ${formatStopwatch(lap.total)} で記録しました`;
+        elements.swAnnouncement.textContent = `ラップ ${lap.number} を ${formatStopwatch(lap.total)} で記録しました`;
       }
 
       function renderLaps() {
         const laps = stopwatch.laps;
-        if (!laps.length) {
+        const hasLaps = stopwatch.lapCount > 0;
+        elements.clearLaps.disabled = !hasLaps;
+        elements.exportLaps.disabled = !hasLaps;
+        elements.statCount.textContent = String(stopwatch.lapCount);
+        elements.statFastest.textContent = hasLaps ? formatStopwatch(stopwatch.fastestSplit) : '—';
+        elements.statSlowest.textContent = hasLaps ? formatStopwatch(stopwatch.slowestSplit) : '—';
+        elements.lapWindowNote.textContent = hasLaps ? `最新${Math.min(LAP_RENDER_LIMIT, laps.length)}件を表示・履歴は直近${laps.length}/${LAP_STORAGE_LIMIT}件を保持` : `最新${LAP_RENDER_LIMIT}件を表示・履歴は${LAP_STORAGE_LIMIT}件まで保持`;
+        if (!hasLaps) {
           elements.lapList.innerHTML = '<div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>';
-          elements.statCount.textContent = '0'; elements.statFastest.textContent = '—'; elements.statSlowest.textContent = '—';
-          updateStopwatchUI();
           return;
         }
-        const splits = laps.map(lap => lap.split);
-        const fastest = Math.min(...splits), slowest = Math.max(...splits);
-        elements.lapList.innerHTML = laps.map((lap, index) => {
-          const badge = laps.length > 1 && lap.split === fastest ? '<span class="lap-badge fastest">最速</span>' : laps.length > 1 && lap.split === slowest ? '<span class="lap-badge slowest">最遅</span>' : '';
-          return `<div class="lap-item"><span class="lap-index">#${index + 1}</span><div class="lap-main"><div class="lap-total">${formatStopwatch(lap.total)}</div><div class="lap-split">+${formatStopwatch(lap.split)}</div></div>${badge}</div>`;
-        }).reverse().join('');
-        elements.statCount.textContent = String(laps.length);
-        elements.statFastest.textContent = formatStopwatch(fastest);
-        elements.statSlowest.textContent = formatStopwatch(slowest);
-        updateStopwatchUI();
+        const visibleLaps = laps.slice(-LAP_RENDER_LIMIT).reverse();
+        const fragment = document.createDocumentFragment();
+        visibleLaps.forEach(lap => {
+          const item = document.createElement('div');
+          item.className = 'lap-item';
+          const badge = stopwatch.lapCount > 1 && lap.split === stopwatch.fastestSplit ? '<span class="lap-badge fastest">最速</span>' : stopwatch.lapCount > 1 && lap.split === stopwatch.slowestSplit ? '<span class="lap-badge slowest">最遅</span>' : '';
+          item.innerHTML = `<span class="lap-index">#${lap.number}</span><div class="lap-main"><div class="lap-total">${formatStopwatch(lap.total)}</div><div class="lap-split">+${formatStopwatch(lap.split)}</div></div>${badge}`;
+          fragment.append(item);
+        });
+        elements.lapList.replaceChildren(fragment);
+      }
+
+      function exportLaps() {
+        if (!stopwatch.laps.length) return;
+        const rows = ['lap,total_ms,split_ms,total,split', ...stopwatch.laps.map(lap => `${lap.number},${Math.round(lap.total)},${Math.round(lap.split)},${formatStopwatch(lap.total)},${formatStopwatch(lap.split)}`)];
+        const url = URL.createObjectURL(new Blob([`\uFEFF${rows.join('\n')}`], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url; link.download = 'tempo-laps.csv'; link.click();
+        URL.revokeObjectURL(url);
       }
 
       function updateAudioUI(message = '') {
@@ -657,7 +701,7 @@
         const mainIcon = timer.completed ? 'bi-volume-mute-fill' : timer.finished ? 'bi-arrow-clockwise' : timer.running ? 'bi-pause-fill' : 'bi-play-fill';
         return `<article class="timer-card ${timer.completed ? 'done' : ''} ${timer.finished ? 'finished' : ''}" id="timer-${timer.id}">
           <div class="timer-topline"><h2 class="timer-name">${escapeHTML(timer.label)}</h2><span class="timer-status ${status.className}">${status.text}</span></div>
-          <div class="timer-middle"><div class="timer-ring" style="--progress:${progress}%"><output class="timer-value" id="timer-value-${timer.id}">${formatTimer(timer.remainingMs)}</output></div><div class="timer-context"><p class="end-label">${timer.completed ? 'タイマー完了' : '終了時刻'}</p><p class="end-value" id="timer-end-${timer.id}">${formatEndTime(timer)}</p></div></div>
+          <div class="timer-middle"><div class="timer-ring"><svg class="timer-progress-svg" viewBox="0 0 100 100" aria-hidden="true"><circle class="timer-track" cx="50" cy="50" r="43" pathLength="100"></circle><circle class="timer-progress" id="timer-progress-${timer.id}" cx="50" cy="50" r="43" pathLength="100" stroke-dasharray="${progress} 100"></circle></svg><output class="timer-value" id="timer-value-${timer.id}">${formatTimer(timer.remainingMs)}</output></div><div class="timer-context"><p class="end-label">${timer.completed ? 'タイマー完了' : '終了時刻'}</p><p class="end-value" id="timer-end-${timer.id}">${formatEndTime(timer)}</p></div></div>
           <div class="timer-actions"><button class="action-button action-primary" type="button" data-timer-action="toggle" data-timer-id="${timer.id}"><i class="bi ${mainIcon}"></i>${mainLabel}</button><button class="action-button action-secondary" type="button" data-timer-action="plus" data-timer-id="${timer.id}" aria-label="1分追加" title="1分追加"><i class="bi bi-plus-lg"></i></button><button class="action-button action-secondary delete-button" type="button" data-timer-action="delete" data-timer-id="${timer.id}" aria-label="タイマーを削除" title="削除"><i class="bi bi-trash3"></i></button></div>
         </article>`;
       }
@@ -683,11 +727,12 @@
         const status = timerStatus(timer);
         const output = $(`#timer-value-${CSS.escape(timer.id)}`);
         const end = $(`#timer-end-${CSS.escape(timer.id)}`);
+        const progress = $(`#timer-progress-${CSS.escape(timer.id)}`);
         const statusEl = $('.timer-status', card);
         if (output) output.textContent = formatTimer(timer.remainingMs);
         if (end) end.textContent = formatEndTime(timer);
+        if (progress) progress.setAttribute('stroke-dasharray', `${Math.max(0, Math.min(100, (timer.remainingMs / timer.totalMs) * 100))} 100`);
         if (statusEl) { statusEl.textContent = status.text; statusEl.className = `timer-status ${status.className}`; }
-        card.style.setProperty('--progress', `${Math.max(0, Math.min(100, (timer.remainingMs / timer.totalMs) * 100))}%`);
       }
 
       function toggleTimer(id) {
@@ -768,39 +813,25 @@
       elements.swMain.addEventListener('click', toggleStopwatch);
       elements.swReset.addEventListener('click', resetStopwatch);
       elements.swLap.addEventListener('click', addLap);
-      elements.clearLaps.addEventListener('click', () => { stopwatch.laps = []; stopwatch.lastLapAt = 0; renderLaps(); elements.swAnnouncement.textContent = 'ラップ履歴をすべて消去しました'; });
+      elements.clearLaps.addEventListener('click', () => { resetLapHistory(); elements.swAnnouncement.textContent = 'ラップ履歴をすべて消去しました'; });
+      elements.exportLaps.addEventListener('click', exportLaps);
       elements.themeButton.addEventListener('click', () => { setTheme(appState.settings.theme === 'dark' ? 'light' : 'dark'); persist(); });
 
       function canHandleSpaceLap(target) {
         return activeScreen === 'stopwatch' && stopwatch.running && !isModalOpen() && !target.closest('input, textarea, select, a, [contenteditable="true"]');
       }
 
-      function stopSpaceHold() {
-        spaceHeld = false;
-        clearTimeout(spaceHoldDelayId);
-        clearInterval(spaceRepeatId);
-        spaceHoldDelayId = null;
-        spaceRepeatId = null;
-      }
-
-      function startSpaceHold() {
-        if (spaceHeld) return;
-        spaceHeld = true;
-        addLap();
-        spaceHoldDelayId = setTimeout(() => {
-          if (!spaceHeld || !stopwatch.running || activeScreen !== 'stopwatch') return;
-          addLap();
-          spaceRepeatId = setInterval(() => {
-            if (!spaceHeld || !stopwatch.running || activeScreen !== 'stopwatch') { stopSpaceHold(); return; }
-            addLap();
-          }, SPACE_LAP_INTERVAL);
-        }, SPACE_HOLD_DELAY);
-      }
+      function stopSpaceHold() { spaceHeld = false; }
 
       document.addEventListener('keydown', event => {
         if (event.code !== 'Space' || !canHandleSpaceLap(event.target)) return;
         event.preventDefault();
-        startSpaceHold();
+        if (!event.repeat) {
+          spaceHeld = true;
+          addLap();
+          return;
+        }
+        if (spaceHeld) addLap();
       });
       document.addEventListener('keyup', event => { if (event.code === 'Space') stopSpaceHold(); });
       window.addEventListener('blur', stopSpaceHold);
