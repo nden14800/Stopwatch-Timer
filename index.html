@@ -118,8 +118,7 @@
     .empty-state { display: grid; min-height: 255px; place-items: center; padding: 25px; border: 1px dashed var(--line); border-radius: 18px; color: var(--subtle); text-align: center; }
     .empty-state i { display: block; margin-bottom: 8px; color: var(--accent); font-size: 24px; }
     .empty-state p { margin: 0; font-size: 13px; }
-    .lap-item { display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; align-items: center; min-height: 58px; padding: 10px 12px; border: 1px solid transparent; border-radius: 16px; background: color-mix(in srgb, var(--surface-raised) 72%, transparent); animation: lap-in .3s ease; }
-    @keyframes lap-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+    .lap-item { display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; align-items: center; min-height: 58px; padding: 10px 12px; border: 1px solid transparent; border-radius: 16px; background: color-mix(in srgb, var(--surface-raised) 72%, transparent); }
     .lap-index { color: var(--subtle); font: 500 12px var(--mono); }
     .lap-main { min-width: 0; }
     .lap-total { overflow: hidden; font: 500 15px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
@@ -580,6 +579,7 @@
           fragment.append(item);
         });
         elements.lapList.replaceChildren(fragment);
+        if (stopwatch.running) elements.lapList.scrollTop = 0;
       }
 
       function exportLaps() {
