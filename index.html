@@ -131,31 +131,38 @@
 
     .timer-header-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 19px; }
     .header-actions { display: flex; align-items: center; gap: 9px; }
+    .audio-unlock-button { display: inline-flex; min-height: 46px; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--primary) 44%, var(--line)); border-radius: 15px; background: color-mix(in srgb, var(--primary) 12%, var(--surface-solid)); color: var(--primary); cursor: pointer; font-size: 12px; font-weight: 800; white-space: nowrap; transition: transform .16s ease, background .16s ease; }
+    .audio-unlock-button:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--primary) 20%, var(--surface-solid)); }
+    .audio-unlock-button.ready { border-color: var(--line); background: var(--surface-raised); color: var(--muted); }
     .timer-header-row .screen-description { margin-bottom: 0; }
+    .timer-metrics { margin: 9px 0 0; color: var(--subtle); font-size: 12px; font-weight: 800; }
+    .bulk-button { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); background: color-mix(in srgb, var(--accent) 9%, var(--surface-solid)); }
+    .bulk-button:hover { background: color-mix(in srgb, var(--accent) 17%, var(--surface-solid)); }
     .quick-section { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 0 0 20px; }
     .quick-label { margin-right: 2px; color: var(--subtle); font-size: 12px; font-weight: 800; }
     .quick-button { min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 64%, transparent); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 800; transition: .16s ease; touch-action: manipulation; }
     .quick-button:hover { border-color: color-mix(in srgb, var(--primary) 50%, var(--line)); background: color-mix(in srgb, var(--primary) 12%, var(--surface)); color: var(--primary); transform: translateY(-1px); }
     .timer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(285px, 1fr)); gap: 16px; }
-    .timer-card { position: relative; display: flex; min-height: 258px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 20px; border-radius: 26px; transition: transform .2s ease, border-color .2s ease; }
-    .timer-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 30%, var(--line)); }
-    .timer-card.done { border-color: color-mix(in srgb, var(--warning) 55%, var(--line)); background: color-mix(in srgb, var(--warning) 9%, var(--surface)); }
+    .timer-card { position: relative; display: flex; min-height: 278px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 22px; border-radius: 30px; background: linear-gradient(145deg, color-mix(in srgb, var(--surface-solid) 82%, transparent), color-mix(in srgb, var(--surface) 85%, transparent)); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+    .timer-card::after { position: absolute; right: -64px; bottom: -76px; width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--primary) 13%, transparent), transparent 68%); content: ""; pointer-events: none; }
+    .timer-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--primary) 38%, var(--line)); box-shadow: 0 28px 62px rgba(3, 9, 24, .35); }
+    .timer-card.done { border-color: color-mix(in srgb, var(--warning) 55%, var(--line)); background: linear-gradient(145deg, color-mix(in srgb, var(--warning) 12%, var(--surface-solid)), color-mix(in srgb, var(--warning) 5%, var(--surface))); }
     .timer-card.finished { opacity: .82; }
-    .timer-topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .timer-topline { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .timer-name { overflow: hidden; margin: 0; font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
     .timer-status { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; }
     .timer-status::before { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle); content: ""; }
     .timer-status.running::before { background: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent); }
     .timer-status.done::before { background: var(--warning); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 14%, transparent); }
-    .timer-middle { display: flex; align-items: center; gap: 18px; }
-    .timer-ring { display: grid; width: 114px; height: 114px; flex: 0 0 114px; place-items: center; border-radius: 50%; background: conic-gradient(var(--primary) var(--progress), color-mix(in srgb, var(--surface-raised) 84%, transparent) 0); }
-    .timer-card.done .timer-ring { background: conic-gradient(var(--warning) var(--progress), color-mix(in srgb, var(--surface-raised) 84%, transparent) 0); }
-    .timer-ring::before { position: absolute; width: 94px; height: 94px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-solid); content: ""; }
-    .timer-value { position: relative; z-index: 1; font: 500 23px/1 var(--mono); letter-spacing: -.07em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .timer-context { min-width: 0; }
+    .timer-middle { position: relative; z-index: 1; display: flex; align-items: center; gap: 20px; }
+    .timer-ring { position: relative; isolation: isolate; display: grid; width: 142px; height: 142px; flex: 0 0 142px; place-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line)); border-radius: 50%; background: conic-gradient(from -90deg, var(--primary) var(--progress), color-mix(in srgb, var(--surface-raised) 92%, transparent) 0); box-shadow: inset 0 0 18px color-mix(in srgb, var(--primary) 20%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
+    .timer-card.done .timer-ring { border-color: color-mix(in srgb, var(--warning) 38%, var(--line)); background: conic-gradient(from -90deg, var(--warning) var(--progress), color-mix(in srgb, var(--surface-raised) 92%, transparent) 0); box-shadow: inset 0 0 18px color-mix(in srgb, var(--warning) 20%, transparent), 0 10px 28px rgba(0, 0, 0, .16); }
+    .timer-ring::before { position: absolute; z-index: -1; inset: 11px; border: 1px solid var(--line); border-radius: 50%; background: radial-gradient(circle at 32% 24%, color-mix(in srgb, white 12%, transparent), transparent 35%), var(--surface-solid); box-shadow: inset 0 1px rgba(255,255,255,.10); content: ""; }
+    .timer-value { position: relative; z-index: 1; font: 500 25px/1 var(--mono); letter-spacing: -.07em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .timer-context { position: relative; z-index: 1; min-width: 0; }
     .end-label { margin: 0 0 5px; color: var(--subtle); font-size: 11px; font-weight: 800; }
     .end-value { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
-    .timer-actions { display: grid; grid-template-columns: 1fr 46px 46px; gap: 9px; touch-action: manipulation; }
+    .timer-actions { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 46px 46px; gap: 9px; touch-action: manipulation; }
     .timer-actions .action-primary { min-height: 50px; border-radius: 15px; font-size: 14px; }
     .timer-actions .action-secondary { min-height: 50px; border-radius: 15px; font-size: 18px; }
     .timer-actions .delete-button:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, var(--line)); }
@@ -219,8 +226,11 @@
       .lap-list { max-height: 286px; }
       .timer-header-row { align-items: flex-start; flex-direction: column; margin-bottom: 15px; }
       .timer-grid { grid-template-columns: 1fr; }
-      .timer-card { min-height: 235px; }
+      .timer-card { min-height: 258px; }
+      .timer-ring { width: 124px; height: 124px; flex-basis: 124px; }
+      .timer-ring::before { inset: 10px; }
       .nav-item { min-width: 0; flex: 1; padding: 0 8px; font-size: 13px; }
+      .audio-unlock-button span { display: none; }
     }
     @media (max-width: 390px) {
       .brand-sub { display: none; }
@@ -228,8 +238,8 @@
       .time-display { font-size: 42px; }
       .stopwatch-controls { grid-template-columns: 54px 1fr 54px; gap: 8px; }
       .timer-middle { gap: 12px; }
-      .timer-ring { width: 102px; height: 102px; flex-basis: 102px; }
-      .timer-ring::before { width: 84px; height: 84px; }
+      .timer-ring { width: 108px; height: 108px; flex-basis: 108px; }
+      .timer-ring::before { inset: 9px; }
       .timer-value { font-size: 20px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
@@ -263,7 +273,7 @@
                 <button class="action-button action-primary" id="sw-main" type="button"><i class="bi bi-play-fill"></i><span>開始</span></button>
                 <button class="action-button action-secondary" id="sw-lap" type="button" aria-label="ラップを記録" title="ラップを記録" disabled><i class="bi bi-flag-fill"></i></button>
               </div>
-              <p class="shortcut-hint">計測中は <kbd>Space</kbd> キーでもラップを記録できます</p>
+              <p class="shortcut-hint"><kbd>Space</kbd> を押すとラップ、長押しで連続ラップを記録します</p>
             </div>
             <p class="sr-only" id="sw-announcement" aria-live="polite"></p>
           </section>
@@ -290,8 +300,11 @@
             <p class="eyebrow">Timers</p>
             <h1 id="timer-title">時間を、静かに味方に。</h1>
             <p class="screen-description">複数のタイマーを並行して、確実に進められます。</p>
+            <p class="timer-metrics" id="timer-metrics" aria-live="polite">稼働中のタイマーはありません</p>
           </div>
           <div class="header-actions">
+            <button class="audio-unlock-button" id="audio-unlock-button" type="button" aria-live="polite"><i class="bi bi-volume-up-fill"></i><span>音を有効化</span></button>
+            <button class="audio-unlock-button bulk-button" id="toggle-all-button" type="button" disabled><i class="bi bi-pause-circle"></i><span>すべて停止</span></button>
             <button class="icon-button" id="add-timer-button" type="button" aria-label="タイマーを追加" title="タイマーを追加"><i class="bi bi-plus-lg"></i></button>
             <button class="icon-button" id="settings-button" type="button" aria-label="タイマーの設定" title="設定"><i class="bi bi-sliders2"></i></button>
           </div>
@@ -346,6 +359,7 @@
       </div>
       <div class="settings-group">
         <div class="setting-line"><div><p class="setting-title">終了時の音</p><p class="setting-help">タイマー終了をやさしく知らせます。</p></div><label class="switch"><input id="sound-enabled" type="checkbox" checked><span></span><span class="sr-only">終了時の音を有効にする</span></label></div>
+        <p class="setting-help" id="audio-status" aria-live="polite">音を有効化すると、ブラウザの音声制限を解除できます。</p>
       </div>
       <div class="settings-group">
         <p class="setting-title">音色</p>
@@ -379,13 +393,19 @@
       const stopwatch = { running: false, startAt: 0, elapsed: 0, requestId: 0, lastLapAt: 0, laps: [] };
       let activeScreen = 'stopwatch';
       let audioContext = null;
+      let audioUnlocked = false;
+      let spaceHeld = false;
+      let spaceHoldDelayId = null;
+      let spaceRepeatId = null;
+      const SPACE_HOLD_DELAY = 450;
+      const SPACE_LAP_INTERVAL = 360;
 
       const elements = {
         themeButton: $('#theme-button'),
         swDisplay: $('#sw-display'), swMain: $('#sw-main'), swReset: $('#sw-reset'), swLap: $('#sw-lap'),
         swState: $('#sw-state'), swStateText: $('#sw-state-text'), swAnnouncement: $('#sw-announcement'),
         lapList: $('#lap-list'), clearLaps: $('#clear-laps'), statCount: $('#stat-count'), statFastest: $('#stat-fastest'), statSlowest: $('#stat-slowest'),
-        timerGrid: $('#timer-grid'), noTimers: $('#no-timers'),
+        timerGrid: $('#timer-grid'), noTimers: $('#no-timers'), timerMetrics: $('#timer-metrics'), toggleAllButton: $('#toggle-all-button'), audioUnlockButton: $('#audio-unlock-button'), audioStatus: $('#audio-status'),
         builderModal: $('#builder-modal'), settingsModal: $('#settings-modal'),
         timerForm: $('#timer-form'), timerName: $('#timer-name'), timerHours: $('#timer-hours'), timerMinutes: $('#timer-minutes'), timerSeconds: $('#timer-seconds'), timerError: $('#timer-form-error'),
         soundEnabled: $('#sound-enabled'), soundVolume: $('#sound-volume'), soundVolumeValue: $('#sound-volume-value'), showDate: $('#show-date')
@@ -516,12 +536,29 @@
         updateStopwatchUI();
       }
 
-      function initAudio() {
+      function updateAudioUI(message = '') {
+        const ready = audioContext && audioContext.state === 'running' && audioUnlocked;
+        elements.audioUnlockButton.classList.toggle('ready', Boolean(ready));
+        elements.audioUnlockButton.innerHTML = ready ? '<i class="bi bi-volume-up-fill"></i><span>音は有効です</span>' : '<i class="bi bi-volume-up-fill"></i><span>音を有効化</span>';
+        elements.audioUnlockButton.setAttribute('aria-label', ready ? '終了音は有効です。クリックで試聴します' : '終了音を有効化して試聴する');
+        if (elements.audioStatus) elements.audioStatus.textContent = message || (ready ? '終了音は有効です。タイマー終了時に再生されます。' : '音を有効化すると、ブラウザの音声制限を解除できます。');
+      }
+
+      async function unlockAudio({ preview = false } = {}) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return null;
-        if (!audioContext) audioContext = new AudioCtx();
-        if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
-        return audioContext;
+        if (!AudioCtx) { updateAudioUI('このブラウザはWeb Audio APIに対応していません。'); return null; }
+        try {
+          if (!audioContext || audioContext.state === 'closed') audioContext = new AudioCtx();
+          if (audioContext.state !== 'running') await audioContext.resume();
+          audioUnlocked = audioContext.state === 'running';
+          updateAudioUI(audioUnlocked ? '終了音を有効化しました。' : '音声の有効化を完了できませんでした。もう一度お試しください。');
+          if (audioUnlocked && preview) playAlarm({ force: true });
+          return audioUnlocked ? audioContext : null;
+        } catch (error) {
+          audioUnlocked = false;
+          updateAudioUI('音声がブロックされました。音を有効化をもう一度押してください。');
+          return null;
+        }
       }
 
       function scheduleNote(ctx, frequency, start, duration, level, type = 'sine') {
@@ -537,25 +574,27 @@
         oscillator.stop(start + duration + 0.02);
       }
 
-      function playAlarm() {
-        if (!appState.settings.sound) return;
-        const ctx = initAudio();
-        if (!ctx) return;
-        const volume = (appState.settings.volume / 100) * 0.45;
-        const start = ctx.currentTime + 0.015;
+      async function playAlarm({ force = false } = {}) {
+        if (!appState.settings.sound && !force) return false;
+        const ctx = await unlockAudio();
+        if (!ctx) return false;
+        const volume = Math.max(.03, (appState.settings.volume / 100) * .62);
+        const start = ctx.currentTime + .035;
         const tone = appState.settings.tone;
         if (tone === 'bright') {
-          scheduleNote(ctx, 660, start, .18, volume, 'triangle');
-          scheduleNote(ctx, 880, start + .23, .26, volume * .9, 'triangle');
+          scheduleNote(ctx, 659.25, start, .23, volume, 'triangle');
+          scheduleNote(ctx, 880, start + .27, .32, volume * .92, 'triangle');
+          scheduleNote(ctx, 1318.51, start + .61, .38, volume * .78, 'triangle');
         } else if (tone === 'clear') {
-          scheduleNote(ctx, 523.25, start, .24, volume * .9, 'sine');
-          scheduleNote(ctx, 783.99, start + .28, .42, volume, 'sine');
-          scheduleNote(ctx, 1567.98, start + .28, .25, volume * .17, 'sine');
+          scheduleNote(ctx, 523.25, start, .30, volume * .88, 'sine');
+          scheduleNote(ctx, 783.99, start + .34, .44, volume, 'sine');
+          scheduleNote(ctx, 1567.98, start + .34, .29, volume * .16, 'sine');
         } else {
-          scheduleNote(ctx, 392, start, .25, volume * .8, 'sine');
-          scheduleNote(ctx, 523.25, start + .30, .38, volume * .7, 'sine');
-          scheduleNote(ctx, 1046.5, start + .30, .25, volume * .10, 'sine');
+          scheduleNote(ctx, 392, start, .32, volume, 'sine');
+          scheduleNote(ctx, 523.25, start + .37, .46, volume * .88, 'sine');
+          scheduleNote(ctx, 1046.5, start + .37, .30, volume * .15, 'sine');
         }
+        return true;
       }
 
       function stopAlarm(timer) {
@@ -567,7 +606,7 @@
         const rounded = Math.max(1000, Math.floor(durationMs / 1000) * 1000);
         const timer = { id, label: label || `タイマー ${appState.timers.length + 1}`, totalMs: rounded, remainingMs: rounded, endAt: now() + rounded, running: true, completed: false, finished: false, alarmId: null };
         appState.timers.unshift(timer);
-        initAudio();
+        void unlockAudio();
         persist(); renderTimers();
       }
 
@@ -576,8 +615,8 @@
         timer.remainingMs = 0;
         timer.running = false;
         timer.completed = true;
-        playAlarm();
-        if (appState.settings.sound) timer.alarmId = setInterval(playAlarm, 4500);
+        void playAlarm();
+        if (appState.settings.sound) timer.alarmId = setInterval(() => { void playAlarm(); }, 4500);
         persist();
       }
 
@@ -623,9 +662,19 @@
         </article>`;
       }
 
+      function updateTimerToolbar() {
+        const running = appState.timers.filter(timer => timer.running).length;
+        const pausable = appState.timers.filter(timer => !timer.completed && !timer.finished && timer.remainingMs > 0).length;
+        elements.timerMetrics.textContent = running ? `稼働中 ${running}件 / 合計 ${appState.timers.length}件` : appState.timers.length ? `一時停止中 ${pausable}件 / 合計 ${appState.timers.length}件` : '稼働中のタイマーはありません';
+        elements.toggleAllButton.disabled = pausable === 0;
+        elements.toggleAllButton.innerHTML = running ? '<i class="bi bi-pause-circle"></i><span>すべて停止</span>' : '<i class="bi bi-play-circle"></i><span>すべて再開</span>';
+        elements.toggleAllButton.setAttribute('aria-label', running ? 'すべてのタイマーを一時停止' : '一時停止中のタイマーをすべて再開');
+      }
+
       function renderTimers() {
         elements.timerGrid.innerHTML = appState.timers.map(timerCardMarkup).join('');
         elements.noTimers.hidden = appState.timers.length > 0;
+        updateTimerToolbar();
       }
 
       function updateTimerCard(timer) {
@@ -644,7 +693,7 @@
       function toggleTimer(id) {
         const timer = appState.timers.find(item => item.id === id);
         if (!timer) return;
-        initAudio();
+        void unlockAudio();
         if (timer.completed) {
           stopAlarm(timer); timer.completed = false; timer.finished = true; timer.running = false;
         } else if (timer.finished) {
@@ -660,7 +709,7 @@
       function addMinute(id) {
         const timer = appState.timers.find(item => item.id === id);
         if (!timer) return;
-        initAudio(); stopAlarm(timer);
+        void unlockAudio(); stopAlarm(timer);
         if (timer.completed || timer.finished) {
           timer.completed = false; timer.finished = false; timer.remainingMs = 60000; timer.totalMs = Math.max(timer.totalMs, 60000); timer.endAt = now() + 60000; timer.running = true;
         } else {
@@ -675,6 +724,17 @@
         if (index < 0) return;
         stopAlarm(appState.timers[index]);
         appState.timers.splice(index, 1);
+        persist(); renderTimers();
+      }
+
+      function toggleAllTimers() {
+        const activeTimers = appState.timers.filter(timer => !timer.completed && !timer.finished && timer.remainingMs > 0);
+        if (!activeTimers.length) return;
+        const shouldPause = activeTimers.some(timer => timer.running);
+        activeTimers.forEach(timer => {
+          if (shouldPause && timer.running) { timer.remainingMs = Math.max(0, timer.endAt - now()); timer.running = false; }
+          if (!shouldPause && !timer.running) { timer.endAt = now() + timer.remainingMs; timer.running = true; }
+        });
         persist(); renderTimers();
       }
 
@@ -711,17 +771,45 @@
       elements.clearLaps.addEventListener('click', () => { stopwatch.laps = []; stopwatch.lastLapAt = 0; renderLaps(); elements.swAnnouncement.textContent = 'ラップ履歴をすべて消去しました'; });
       elements.themeButton.addEventListener('click', () => { setTheme(appState.settings.theme === 'dark' ? 'light' : 'dark'); persist(); });
 
-      document.addEventListener('keydown', event => {
-        if (event.code !== 'Space' || event.repeat || activeScreen !== 'stopwatch' || !stopwatch.running || isModalOpen()) return;
-        const target = event.target;
-        if (target.closest('input, textarea, select, a, [contenteditable="true"]')) return;
-        event.preventDefault();
+      function canHandleSpaceLap(target) {
+        return activeScreen === 'stopwatch' && stopwatch.running && !isModalOpen() && !target.closest('input, textarea, select, a, [contenteditable="true"]');
+      }
+
+      function stopSpaceHold() {
+        spaceHeld = false;
+        clearTimeout(spaceHoldDelayId);
+        clearInterval(spaceRepeatId);
+        spaceHoldDelayId = null;
+        spaceRepeatId = null;
+      }
+
+      function startSpaceHold() {
+        if (spaceHeld) return;
+        spaceHeld = true;
         addLap();
+        spaceHoldDelayId = setTimeout(() => {
+          if (!spaceHeld || !stopwatch.running || activeScreen !== 'stopwatch') return;
+          addLap();
+          spaceRepeatId = setInterval(() => {
+            if (!spaceHeld || !stopwatch.running || activeScreen !== 'stopwatch') { stopSpaceHold(); return; }
+            addLap();
+          }, SPACE_LAP_INTERVAL);
+        }, SPACE_HOLD_DELAY);
+      }
+
+      document.addEventListener('keydown', event => {
+        if (event.code !== 'Space' || !canHandleSpaceLap(event.target)) return;
+        event.preventDefault();
+        startSpaceHold();
       });
+      document.addEventListener('keyup', event => { if (event.code === 'Space') stopSpaceHold(); });
+      window.addEventListener('blur', stopSpaceHold);
       document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal.open').forEach(modal => closeModal(modal.id)); });
 
       $$('.nav-item').forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
       $('#settings-button').addEventListener('click', () => openModal('settings-modal'));
+      elements.audioUnlockButton.addEventListener('click', () => { void unlockAudio({ preview: true }); });
+      elements.toggleAllButton.addEventListener('click', toggleAllTimers);
       $('#add-timer-button').addEventListener('click', () => openModal('builder-modal'));
       $('#empty-add-timer').addEventListener('click', () => openModal('builder-modal'));
       $$('.quick-button').forEach(button => button.addEventListener('click', () => createTimer(Number(button.dataset.quickMinutes) * 60000, `${button.dataset.quickMinutes}分タイマー`)));
@@ -754,11 +842,12 @@
       elements.showDate.addEventListener('change', event => { appState.settings.showDate = event.target.checked; saveSettings(); });
       elements.soundVolume.addEventListener('input', event => { appState.settings.volume = Number(event.target.value); elements.soundVolumeValue.textContent = `${appState.settings.volume}%`; saveSettings(); });
       $$('input[name="tone"]').forEach(input => input.addEventListener('change', event => { appState.settings.tone = event.target.value; saveSettings(); }));
-      $('#preview-sound').addEventListener('click', () => { initAudio(); playAlarm(); });
+      $('#preview-sound').addEventListener('click', () => { void unlockAudio({ preview: true }); });
 
       restore();
       setTheme(appState.settings.theme);
       syncSettingsControls();
+      updateAudioUI();
       renderLaps(); updateStopwatchUI(); renderTimers();
       setInterval(tickTimers, 200);
     })();
