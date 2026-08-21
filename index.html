@@ -295,7 +295,7 @@
             <div class="lap-list" id="lap-list">
               <div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>
             </div>
-            <p class="lap-window-note" id="lap-window-note">最新40件を表示・履歴は100件まで保持</p>
+              <p class="lap-window-note" id="lap-window-note">最新40件を表示・履歴はすべて保持</p>
             <div class="lap-stats" aria-label="ラップの集計">
               <div class="stat"><span class="stat-label">ラップ数</span><span class="stat-value" id="stat-count">0</span></div>
               <div class="stat"><span class="stat-label">最速</span><span class="stat-value" id="stat-fastest">—</span></div>
@@ -408,7 +408,6 @@
         timers: []
       };
       const LAP_RENDER_LIMIT = 40;
-      const LAP_STORAGE_LIMIT = 100;
       const stopwatch = { running: false, startAt: 0, elapsed: 0, requestId: 0, lastLapAt: 0, laps: [], lapCount: 0, fastestSplit: Infinity, slowestSplit: 0, lapRenderRequest: null, lapRenderQueued: false };
       let activeScreen = 'stopwatch';
       let audioContext = null;
@@ -550,7 +549,6 @@
         stopwatch.fastestSplit = Math.min(stopwatch.fastestSplit, lap.split);
         stopwatch.slowestSplit = Math.max(stopwatch.slowestSplit, lap.split);
         stopwatch.laps.push(lap);
-        if (stopwatch.laps.length > LAP_STORAGE_LIMIT) stopwatch.laps.shift();
         queueLapRender();
         elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
         elements.swAnnouncement.textContent = `ラップ ${lap.number} を ${formatStopwatch(lap.total)} で記録しました`;
@@ -564,7 +562,7 @@
         elements.statCount.textContent = String(stopwatch.lapCount);
         elements.statFastest.textContent = hasLaps ? formatStopwatch(stopwatch.fastestSplit) : '—';
         elements.statSlowest.textContent = hasLaps ? formatStopwatch(stopwatch.slowestSplit) : '—';
-        elements.lapWindowNote.textContent = hasLaps ? `最新${Math.min(LAP_RENDER_LIMIT, laps.length)}件を表示・履歴は直近${laps.length}/${LAP_STORAGE_LIMIT}件を保持` : `最新${LAP_RENDER_LIMIT}件を表示・履歴は${LAP_STORAGE_LIMIT}件まで保持`;
+        elements.lapWindowNote.textContent = hasLaps ? `最新${Math.min(LAP_RENDER_LIMIT, laps.length)}件を表示・保存済み ${laps.length.toLocaleString()}件` : `最新${LAP_RENDER_LIMIT}件を表示・履歴はすべて保持`;
         if (!hasLaps) {
           elements.lapList.innerHTML = '<div class="empty-state"><div><i class="bi bi-flag"></i><p>計測中にラップを追加すると、ここに記録されます。</p></div></div>';
           return;
