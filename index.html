@@ -414,6 +414,7 @@
       let audioUnlocked = false;
       let spaceHeld = false;
       let spaceRepeatId = null;
+      let lapPersistTimeout = null;
 
       const elements = {
         themeButton: $('#theme-button'),
@@ -426,9 +427,22 @@
         soundEnabled: $('#sound-enabled'), soundVolume: $('#sound-volume'), soundVolumeValue: $('#sound-volume-value'), lapRepeatSpeed: $('#lap-repeat-speed'), lapRepeatSpeedValue: $('#lap-repeat-speed-value'), showDate: $('#show-date')
       };
 
+      function lapHistorySnapshot() {
+        return {
+          laps: stopwatch.laps.map(({ number, total, split }) => ({ number, total, split })),
+          lapCount: stopwatch.lapCount
+        };
+      }
+
       function persist() {
         const serializableTimers = appState.timers.map(({ alarmId, ...timer }) => timer);
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: appState.settings, timers: serializableTimers })); } catch (_) { /* ストレージが利用できない環境でも継続する */ }
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: appState.settings, timers: serializableTimers, lapHistory: lapHistorySnapshot() })); } catch (_) { /* ストレージが利用できない環境でも継続する */ }
+      }
+
+      function scheduleLapPersist(immediate = false) {
+        if (lapPersistTimeout !== null) clearTimeout(lapPersistTimeout);
+        if (immediate) { lapPersistTimeout = null; persist(); return; }
+        lapPersistTimeout = setTimeout(() => { lapPersistTimeout = null; persist(); }, 250);
       }
 
       function restore() {
@@ -450,6 +464,17 @@
               if (timer.remainingMs === 0) { timer.running = false; timer.completed = true; }
             }
           });
+          const savedLaps = Array.isArray(saved.lapHistory?.laps) ? saved.lapHistory.laps : [];
+          stopwatch.laps = savedLaps.map((lap, index) => ({
+            number: Math.max(1, Number(lap.number) || index + 1),
+            total: Math.max(0, Number(lap.total) || 0),
+            split: Math.max(0, Number(lap.split) || 0)
+          }));
+          const restoredCount = Math.max(0, Number(saved.lapHistory?.lapCount) || 0);
+          stopwatch.lapCount = Math.max(restoredCount, stopwatch.laps.at(-1)?.number || 0, stopwatch.laps.length);
+          stopwatch.fastestSplit = stopwatch.laps.length ? Math.min(...stopwatch.laps.map(lap => lap.split)) : Infinity;
+          stopwatch.slowestSplit = stopwatch.laps.length ? Math.max(...stopwatch.laps.map(lap => lap.split)) : 0;
+          stopwatch.lastLapAt = 0;
         } catch (_) { /* 破損した保存値は初期状態として扱う */ }
       }
 
@@ -521,6 +546,7 @@
         stopwatch.lapRenderRequest = null;
         stopwatch.lapRenderQueued = false;
         renderLaps();
+        scheduleLapPersist(true);
       }
 
       function resetStopwatch() {
@@ -550,6 +576,7 @@
         stopwatch.slowestSplit = Math.max(stopwatch.slowestSplit, lap.split);
         stopwatch.laps.push(lap);
         queueLapRender();
+        scheduleLapPersist();
         elements.swDisplay.textContent = formatStopwatch(stopwatch.elapsed);
         elements.swAnnouncement.textContent = `ラップ ${lap.number} を ${formatStopwatch(lap.total)} で記録しました`;
       }
@@ -865,6 +892,7 @@
       });
       document.addEventListener('keyup', event => { if (event.code === 'Space') stopSpaceHold(); });
       window.addEventListener('blur', stopSpaceHold);
+      window.addEventListener('pagehide', () => scheduleLapPersist(true));
       document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal.open').forEach(modal => closeModal(modal.id)); });
 
       $$('.nav-item').forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
